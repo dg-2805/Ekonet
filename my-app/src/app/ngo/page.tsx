@@ -516,12 +516,12 @@ export default function NGODashboard() {
                </CardTitle>
              </CardHeader>
              <CardContent>
-               <div className="bg-gradient-to-br from-emerald-500/10 to-blue-500/10 rounded-xl h-106 flex items-center justify-center border border-white/20">
+               <div className="relative bg-gradient-to-br from-emerald-500/10 to-blue-500/10 rounded-xl border border-white/20 overflow-hidden h-[420px] md:h-[560px] lg:h-[600px]">
                  <iframe
                    src="/wildlife_clustering.html"
                    title="Wildlife Incident Clusters Map"
-                   className="w-full h-[600px] rounded-xl border-none"
-                   style={{ minHeight: 500, background: "transparent" }}
+                   className="absolute inset-0 w-full h-full border-none"
+                   style={{ background: "transparent" }}
                  />
                </div>
                              <div className="flex items-center justify-between mt-6">

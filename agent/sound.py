@@ -6,6 +6,7 @@ import base64
 import json
 from datetime import datetime
 from typing import Dict, Any, Optional, Union
+from pathlib import Path
 
 # Load environment variables
 load_dotenv()
@@ -63,7 +64,7 @@ class AudioAnalyzer:
         except Exception as e:
             raise Exception(f"Transcription failed: {e}")
     
-    def analyze_with_gemini(self, transcribed_text: str, audio_path: str) -> Dict[str, Any]:
+    def analyze_with_gemini(self, transcribed_text: str, audio_path: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Enhanced analysis with Gemini 1.5 Flash
         
@@ -81,105 +82,176 @@ class AudioAnalyzer:
                 "data": self.encode_audio(audio_path)
             }
             
+            # Prepare context information
+            context_info = ""
+            if context:
+                context_info = f"""
+CONTEXT INFORMATION:
+- Location: {context.get("location", "Not provided")}
+- Threat Description: {context.get("description", "Not provided")}
+- Threat Type: {context.get("threat_type", "Not provided")}
+- Coordinates: {context.get("coordinates", "Not provided")}
+- Report ID: {context.get("report_id", "Not provided")}
+
+Use this context to enhance your analysis, especially for threat assessment and risk evaluation.
+"""
+
             # Structured prompt for animal protection focus
-            prompt = """**Animal Protection Analysis Task**
-            
-            **Inputs:**
-            1. Audio recording (provided)
-            2. Transcription: {transcription}
+            prompt = f"""Wildlife Threat Analysis - Audio + Context{context_info}
 
-            **Required Analysis:**
-            - **Species Identification** (include confidence %)
-            - **Distress Detection** (vocalizations, human speech cues)
-            - **Illegal Activity Indicators** (key phrases, sounds)
-            - **Location Clues** (background noises suggesting habitat)
-            - **Urgency Assessment** (1-5 scale with justification)
+You are analyzing an audio recording for wildlife threats and conservation concerns. The audio provides acoustic evidence, and you have additional context information about the incident.
 
-            **Output Format:**
-            json
-            {{
-                "species": {{
-                    "scientific_name": "",
-                    "genus": "",
-                    "species_epithet": "",
-                    "subspecies": null,
-                    "common_name": "",
-                    "other_common_names": [],
-                    "confidence": 0,
-                    "taxonomy": {{
-                        "class": "",
-                        "order": "",
-                        "family": ""
-                    }},
-                    "distinguishing_features": [],
-                    "similar_candidates": [
-                        {{
-                            "scientific_name": "",
-                            "common_name": "",
-                            "confidence": 0,
-                            "why_not": ""
-                        }}
-                    ]
-                }},
-                "conservation": {{
-                    "iucn_status": "",
-                    "protected_status": ""
-                }},
-                "danger_profile": {{
-                    "is_venomous": null,
-                    "is_poisonous": null,
-                    "toxicity_level": null,
-                    "primary_toxins": [],
-                    "threat_to_humans": "",
-                    "evidence": ""
-                }},
-                "health_indicators": {{
-                    "age_sex": null,
-                    "visible_injuries": [],
-                    "condition": "",
-                    "distress_signs": []
-                }},
-                "habitat_context": {{
-                    "environment": "",
-                    "human_impact": null
-                }},
-                "threat_analysis": {{
-                    "illegal_activity_detected": false,
-                    "evidence": [],
-                    "weapons_traps": [],
-                    "suspicious_activity": []
-                }},
-                "risk_assessment": {{
-                    "level": 1,
-                    "justification": "",
-                    "urgency": "Low/Moderate/High/Critical/Emergency"
-                }},
-                "recommended_actions": []
-            }}
-            """.format(transcription=transcribed_text)
+ANALYSIS APPROACH:
+1. First, identify any wildlife species audible in the recording with high specificity
+2. Then, combine the acoustic evidence with the provided context to assess threats
+3. Consider the location, threat type, and description when evaluating risks
+4. Provide comprehensive threat assessment and conservation recommendations
+
+Return ONLY valid JSON matching this schema:
+{{
+  "species": {{
+    "scientific_name": "",            // Full binomial or trinomial, e.g., "Panthera tigris tigris"
+    "genus": "",
+    "species_epithet": "",
+    "subspecies": null,                // or string if identified
+    "common_name": "",               // most widely used common name
+    "other_common_names": [],         // optional variants/regional names
+    "confidence": 0,                  // 0-100 integer
+    "taxonomy": {{
+      "class": "",
+      "order": "",
+      "family": ""
+    }},
+    "distinguishing_features": [      // 3-7 concise phrases from the audio that justify the ID
+    ],
+    "similar_candidates": [           // up to 3 alternatives with reasons they were rejected
+      {{
+        "scientific_name": "",
+        "common_name": "",
+        "confidence": 0,
+        "why_not": ""
+      }}
+    ]
+  }},
+  "conservation": {{
+    "iucn_status": "",
+    "protected_status": ""           // e.g., CITES or national protection if commonly known
+  }},
+  "danger_profile": {{
+    "is_venomous": null,               // true, false, or null if unknown (use "venomous" for snakes)
+    "is_poisonous": null,              // true, false, or null if unknown (toxins by ingestion/contact)
+    "toxicity_level": null,            // one of: "low", "moderate", "high", "unknown"
+    "primary_toxins": [],             // e.g., ["neurotoxic", "hemotoxic"] when known
+    "threat_to_humans": "",          // brief plain-language note
+    "evidence": ""                   // basis for assessment (species knowledge + audio context)
+  }},
+  "health_indicators": {{
+    "age_sex": null,                  // e.g., "Adult male" when discernible, else null
+    "visible_injuries": [],
+    "condition": "",                  // brief assessment if possible
+    "distress_signs": []              // vocal indicators of distress
+  }},
+  "habitat_context": {{
+    "environment": "",               // habitat inferred from audio
+    "human_impact": null              // null if none audible; else short description
+  }},
+  "threat_analysis": {{
+    "illegal_activity_detected": false,
+    "evidence": [],
+    "weapons_traps": [],
+    "suspicious_activity": []
+  }},
+  "risk_assessment": {{
+    "level": 1,                       // 1=Low, 2=Moderate, 3=High, 4=Critical, 5=Emergency
+    "justification": "",
+    "urgency": "Low/Moderate/High/Critical/Emergency"
+  }},
+  "ngo_recommendation": [
+    "Anti poaching",
+    "Human wildlife conflict",
+    "Medical care",
+    "Habitat restoration",
+    "Species recovery"
+  ],
+  "recommended_actions": []
+}}
+
+ANALYSIS GUIDELINES:
+- SPECIES IDENTIFICATION: Be specific and include subspecies when justified by audible traits
+- CONTEXT INTEGRATION: Use the provided context (location, threat type, description) to enhance your analysis
+- THREAT ASSESSMENT: Consider both acoustic evidence and context information when evaluating risks
+- CONSERVATION FOCUS: Prioritize conservation concerns and illegal activities
+- RISK EVALUATION: Assess urgency based on species vulnerability, threat type, and location
+- RECOMMENDATIONS: Provide specific, actionable conservation recommendations
+
+AUDIO TRANSCRIPTION: {transcribed_text}
+
+Return only valid JSON without any Markdown or commentary.
+"""
 
             # Generate analysis
             response = self.model_gemini.generate_content([prompt, audio_part])
             
-            # Extract JSON from Markdown if needed
+            # Extract JSON from response
             try:
-                return json.loads(response.text.split('json')[1].split('')[0].strip())
-            except:
-                return {"raw_response": response.text, "parse_error": "Failed to extract JSON"}
+                text = response.text.strip()
+                
+                # Look for JSON code blocks
+                if '```json' in text:
+                    start = text.find('```json') + 7
+                    end = text.find('```', start)
+                    if end != -1:
+                        json_str = text[start:end].strip()
+                        return json.loads(json_str)
+                
+                # Look for JSON without language specifier
+                if '```' in text:
+                    start = text.find('```') + 3
+                    end = text.find('```', start)
+                    if end != -1:
+                        json_str = text[start:end].strip()
+                        # Try to parse as JSON
+                        try:
+                            return json.loads(json_str)
+                        except:
+                            pass
+                
+                # Look for JSON object directly in the text
+                # Find the first { and last }
+                start = text.find('{')
+                end = text.rfind('}')
+                
+                if start != -1 and end != -1 and end > start:
+                    json_str = text[start:end + 1]
+                    return json.loads(json_str)
+                
+                # If no JSON found, return the raw text
+                return {
+                    "raw_response": text,
+                    "parse_error": "No valid JSON found in response",
+                    "status": "parsing_failed"
+                }
+                
+            except Exception as e:
+                return {"raw_response": response.text, "parse_error": f"Failed to extract JSON: {str(e)}"}
             
         except Exception as e:
             return {"error": str(e), "status": "gemini_analysis_failed"}
     
-    def analyze(self, audio_path: str) -> Dict[str, Any]:
+    def analyze_with_context(self, audio_path: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Complete audio analysis pipeline
         
         Args:
             audio_path: Path to the audio file to analyze
+            context: Optional context information for enhanced analysis
             
         Returns:
             Complete analysis results as dictionary
         """
+        
+        if context:
+            print(f"🎵 AI Agent received context for audio analysis")
         try:
             # Clean path by removing spaces
             audio_path = audio_path.replace(" ", "")
@@ -193,13 +265,10 @@ class AudioAnalyzer:
                 return self._add_metadata(error_result, audio_path)
             
             # Step 1: Audio Transcription
-            print("🦻 Transcribing audio...")
             transcribed_text = self.transcribe_audio(audio_path)
-            print(f"\n🔊 Transcription:\n{transcribed_text}")
             
             # Step 2: Multimodal Analysis
-            print("\n🔍 Analyzing with Gemini 2.5 Flash...")
-            analysis = self.analyze_with_gemini(transcribed_text, audio_path)
+            analysis = self.analyze_with_gemini(transcribed_text, audio_path, context)
             
             # Create results dictionary with metadata
             result_data = {
@@ -216,6 +285,12 @@ class AudioAnalyzer:
                 "message": f"❌ Error: {e}"
             }
             return self._add_metadata(error_result, audio_path)
+    
+    def analyze(self, audio_path: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Legacy method - redirects to analyze_with_context for backward compatibility
+        """
+        return self.analyze_with_context(audio_path, context)
     
     def _add_metadata(self, result: Dict[str, Any], audio_path: str) -> Dict[str, Any]:
         """

@@ -20,6 +20,15 @@ except Exception as import_err:
     _import_error_message = str(import_err)
     print(f"❌ Failed to import UniversalDetector: {_import_error_message}")
 
+# Try import VideoAnalyzer for video handling
+try:
+    from video2 import VideoAnalyzer  # type: ignore
+    _video2_ok = True
+except Exception as _ve:
+    VideoAnalyzer = None  # type: ignore
+    _video2_ok = False
+    print(f"⚠️ Could not import video2.VideoAnalyzer: {_ve}")
+
 app = Flask(__name__)
 CORS(app, resources={r"*": {"origins": ["http://localhost:5173", "http://localhost:3000", "http://localhost:8080"]}})
 
@@ -98,34 +107,70 @@ def analyze() -> Any:
             
             print(f"📄 Analyzing file: {f.filename}")
             
-            # Get file extension and create temp file
-            file_ext = Path(f.filename).suffix
-            with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as tmp:
-                f.save(tmp.name)
-                tmp_path = Path(tmp.name)
+            original_name = Path(f.filename).stem
+            output_path = f"C:/PROJECTS/StatusCode2/Ekonet/backend/{original_name}_analysis.json"
 
+            is_video = (f.mimetype or '').startswith('video')
+
+            tmp_path: Optional[Path] = None
             try:
-                # Analyze file with context
-                analysis = _analyze_file_with_context(tmp_path, analysis_context)
+                if is_video and VideoAnalyzer is not None and _video2_ok:
+                    # Read uploaded bytes directly, prefer context-aware API
+                    raw_bytes = f.read()
+                    analyzer = VideoAnalyzer()
+                    if hasattr(analyzer, 'analyze_with_context'):
+                        analysis = analyzer.analyze_with_context(
+                            raw_bytes,
+                            analysis_context,
+                            mime_type=f.mimetype,
+                            filename=f.filename,
+                        )
+                        file_size_val = len(raw_bytes) if raw_bytes is not None else None
+                        source_label = "uploaded_bytes"
+                    else:
+                        # Fallback to temp-file path based analysis
+                        file_ext = Path(f.filename).suffix
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as tmp:
+                            tmp.write(raw_bytes)
+                            tmp.flush()
+                            tmp_path = Path(tmp.name)
+                        analysis = analyzer.analyze(str(tmp_path))
+                        file_size_val = os.path.getsize(tmp_path)
+                        source_label = str(tmp_path)
+                else:
+                    # For images and non-video types: save to temp and analyze
+                    file_ext = Path(f.filename).suffix
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as tmp:
+                        f.save(tmp.name)
+                        tmp_path = Path(tmp.name)
+                    analysis = _analyze_file_with_context(tmp_path, analysis_context)
+                    file_size_val = os.path.getsize(tmp_path)
+                    source_label = str(tmp_path)
                 
-                # Generate output filename
-                original_name = Path(f.filename).stem
-                output_path = f"C:/PROJECTS/StatusCode2/Ekonet/backend/{original_name}_analysis.json"
-
                 # Save results
                 if UniversalDetector is not None:
-                    detector = UniversalDetector()
-                    detector.save_results(analysis, output_path)
-                    print(f"✅ Generated report: {original_name}_analysis.json")
+                    try:
+                        detector = UniversalDetector()
+                        detector.save_results(analysis, output_path)
+                    except Exception:
+                        # Fallback simple save
+                        with open(output_path, 'w') as out_f:
+                            json.dump(analysis, out_f, indent=2)
+                else:
+                    # Save directly if detector not available
+                    with open(output_path, 'w') as out_f:
+                        json.dump(analysis, out_f, indent=2)
+                print(f"✅ Generated report: {original_name}_analysis.json")
                 
                 results.append({
                     "analysis_type": "file_with_context",
                     "original_filename": f.filename,
                     "content_type": f.mimetype,
-                    "file_size": os.path.getsize(tmp_path),
+                    "file_size": file_size_val,
                     "analysis_result": analysis,
                     "saved_json_path": output_path,
-                    "context_used": analysis_context
+                    "context_used": analysis_context,
+                    "source": source_label,
                 })
                 
             except Exception as e:
@@ -138,11 +183,12 @@ def analyze() -> Any:
                     "context_used": analysis_context
                 })
             finally:
-                # Clean up temp file
-                try:
-                    os.unlink(tmp_path)
-                except OSError:
-                    pass
+                # Clean up temp file if created
+                if tmp_path is not None:
+                    try:
+                        os.unlink(tmp_path)
+                    except OSError:
+                        pass
     else:
         # Text-Only Analysis
         print(f"📝 Analyzing text description")
