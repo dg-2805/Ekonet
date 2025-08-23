@@ -41,6 +41,8 @@ const Navbar = () => {
         } catch (error) {
           console.error('Error parsing updated user data:', error)
         }
+      } else {
+        setUser(null)
       }
     }
     
@@ -65,6 +67,17 @@ const Navbar = () => {
     setAuthOpen(true)
   }
 
+  const renderRoleLink = () => {
+    if (user?.role === 'reporter') {
+      return (
+        <Link href="/dashboard" className="text-muted-foreground hover:text-primary transition-colors">Dashboard</Link>
+      )
+    }
+    return (
+      <Link href="/ngo" className="text-muted-foreground hover:text-primary transition-colors">For NGOs</Link>
+    )
+  }
+
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
       isScrolled ? 'bg-white/10 backdrop-blur-xl border-b border-white/20 shadow-xl' : 'bg-transparent'
@@ -77,8 +90,8 @@ const Navbar = () => {
           </Link>
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-muted-foreground hover:text-primary transition-colors">How it Works</a>
-            <Link href="/report" className="text-muted-foreground hover:text-primary transition-colors">Report</Link>
-            <Link href="/ngo" className="text-muted-foreground hover:text-primary transition-colors">For NGOs</Link>
+            {renderRoleLink()}
+            <Link href="/live-detection" className="text-muted-foreground hover:text-primary transition-colors">Live Detection</Link>
             <a href="#about" className="text-muted-foreground hover:text-primary transition-colors">About</a>
           </div>
           <div className="flex items-center gap-3">
@@ -93,9 +106,9 @@ const Navbar = () => {
                     alt="Profile"
                     className="w-8 h-8 rounded-full border-2 border-primary shadow"
                   />
-                                     <span className="text-sm font-medium text-white hidden sm:block">
-                     {user.role === 'ngo' ? user.orgName : user.name}
-                   </span>
+                  <span className="text-sm font-medium text-white hidden sm:block">
+                    {user.role === 'ngo' ? user.orgName : user.name}
+                  </span>
                 </button>
                 {showDropdown && (
                   <div className="absolute right-0 mt-2 w-32 bg-white rounded shadow-lg z-50">
