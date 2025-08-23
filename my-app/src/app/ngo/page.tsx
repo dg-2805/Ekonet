@@ -34,14 +34,17 @@ import { Textarea } from "@/components/ui/textarea"
 
 interface Incident {
   id: string
+  shortId: string
   reportedAt: string
   type: string
   location: string
   priority: "Low" | "Medium" | "High" | "Critical"
   status: "New" | "Triaged" | "Assigned" | "In-Progress" | "Resolved"
-  evidenceCount: number
+  evidence_count: number
   anonymous: boolean
   aiScore: number
+  aiReport?: string
+  reporterName?: string
 }
 
 interface Summary {
@@ -79,6 +82,95 @@ export default function NGODashboard() {
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [modalStatus, setModalStatus] = useState<string>("")
   const [user, setUser] = useState<any>(null)
+
+  // Map report-analysis docs to triage incidents
+  const makeShortId = (full: string): string => {
+    if (!full) return ''
+    const clean = String(full)
+    // Prefer last 4 chars for readability; fallback to first 4
+    return clean.length > 4 ? clean.slice(-4).toUpperCase() : clean.toUpperCase()
+  }
+
+  const mapUrgencyToPriority = (urgency?: string): Incident["priority"] => {
+    const u = (urgency || '').toLowerCase()
+    if (u === 'low') return 'Low'
+    if (u === 'moderate' || u === 'medium') return 'Medium'
+    if (u === 'high') return 'High'
+    if (u === 'critical' || u === 'emergency') return 'Critical'
+    return 'Low'
+  }
+
+  const pickIncidentType = (doc: any): string => {
+    const inc = doc?.incident || {}
+    const trueKey = Object.keys(inc).find(k => {
+      const v = inc[k]
+      return v === true || (typeof v === 'string' && v.toLowerCase() === 'true')
+    })
+    if (trueKey) return trueKey
+    if (doc?.threat_analysis?.illegal_activity_detected) return 'Illegal Activity'
+    return doc?.species?.common_name || doc?.species?.scientific_name || 'Unknown'
+  }
+
+  // Normalize timestamps that may include microseconds to a JS Date-friendly ISO string
+  const normalizeTimestamp = (input: any): string | null => {
+    if (typeof input !== 'string' || !input) return null
+    let s = input.trim()
+    // Reduce fractional seconds to milliseconds (3 digits)
+    s = s.replace(/\.(\d{3})\d+/, '.$1')
+    // Ensure it ends with a timezone (add Z if missing)
+    if (!/(Z|[+\-]\d{2}:?\d{2})$/i.test(s)) {
+      s = s + 'Z'
+    }
+    const d = new Date(s)
+    if (isNaN(d.getTime())) return null
+    return d.toISOString()
+  }
+
+  const mapDocToIncident = (doc: any): Incident => {
+    const aiScoreRaw = doc?.risk_assessment?.["ai-score"]
+    const aiScore10 = typeof aiScoreRaw === 'string' ? parseFloat(aiScoreRaw) : (typeof aiScoreRaw === 'number' ? aiScoreRaw : 0)
+    const evidFromRisk = doc?.risk_assessment?.evidence_count
+    const evid = typeof evidFromRisk === 'string' ? parseInt(evidFromRisk, 10) : (
+      typeof evidFromRisk === 'number' ? evidFromRisk : (
+        Array.isArray(doc?.threat_analysis?.evidence) ? doc.threat_analysis.evidence.length : 0
+      )
+    )
+    const reporter = (doc?.reporter_name && String(doc.reporter_name).trim()) ? String(doc.reporter_name) : (user?.name || undefined)
+
+    // Prefer metadata.timestamp; fallback to universal_detector.file_info.created; normalize both
+    const createdRaw = doc?.metadata?.universal_detector?.file_info?.created
+    const timestampRaw = doc?.metadata?.timestamp
+    const reportedAt = normalizeTimestamp(timestampRaw) || normalizeTimestamp(createdRaw) || new Date().toISOString()
+    return {
+      id: String(doc?._id || ''),
+      shortId: makeShortId(String(doc?._id || '')),
+      reportedAt,
+      type: pickIncidentType(doc),
+      location: doc?.Location || 'Unknown',
+      priority: mapUrgencyToPriority(doc?.risk_assessment?.urgency),
+      status: 'New',
+      evidence_count: Number.isFinite(evid) ? evid : 0,
+      anonymous: false,
+      aiScore: Math.max(0, Math.min(10, aiScore10 || 0)),
+      aiReport: doc?.risk_assessment?.["ai-report"] || '',
+      reporterName: reporter,
+    }
+  }
+
+  const loadReportAnalysis = async (): Promise<Incident[]> => {
+    const res = await fetch('/api/report-analysis?limit=200')
+    if (!res.ok) {
+      console.error('Failed to fetch report-analysis:', res.status, res.statusText)
+      setIncidents([])
+      return []
+    }
+    const data = await res.json()
+    const items = Array.isArray(data?.items) ? data.items : []
+    const mapped = items.map(mapDocToIncident)
+    setIncidents(mapped)
+    console.log('📋 NGO triage incidents (from report-analysis):', mapped)
+    return mapped
+  }
 
   useEffect(() => {
     // Get user data from API using JWT token
@@ -123,6 +215,27 @@ export default function NGODashboard() {
     fetchUserData()
   }, [])
 
+  // Fetch and console.log report-analysis documents for NGOs
+  useEffect(() => {
+    const fetchReportAnalysis = async () => {
+      try {
+        const res = await fetch('/api/report-analysis?limit=20')
+        if (!res.ok) {
+          console.error('Failed to fetch report-analysis:', res.status, res.statusText)
+          return
+        }
+        const data = await res.json()
+        console.log('📋 NGO report-analysis FULL (all fields):')
+        // Pretty-print all fields for each document without truncation
+        console.log(JSON.stringify(data.items || [], null, 2))
+      } catch (err) {
+        console.error('Error fetching report-analysis:', err)
+      }
+    }
+
+    fetchReportAnalysis()
+  }, [])
+
   const fetchData = async (userData?: any) => {
     try {
       // Use passed userData or fallback to state user
@@ -144,47 +257,12 @@ export default function NGODashboard() {
         setSummary(summaryData)
       }
 
-      // Fetch incidents
-      const incidentsRes = await fetch("/api/ngo/incidents")
-      const incidentsData = await incidentsRes.json()
-      setIncidents(incidentsData.items)
+      // Load triage incidents from report-analysis (remove hardcoded)
+      await loadReportAnalysis()
     } catch (error) {
       console.error("Failed to fetch data:", error)
-      // Fallback mock data with user data
-      const currentUser = userData || user
-      setSummary({
-        openIncidents: 12,
-        slaBreaches24h: 2,
-        avgTriageMinutes: 45,
-        donationsToday: 2500,
-        trend: [8, 12, 15, 11, 9, 14, 12],
-        ngoName: currentUser?.orgName,
-        ngoLocation: currentUser?.location
-      })
-      setIncidents([
-        {
-          id: "INC-001",
-          reportedAt: "2024-01-15T10:30:00Z",
-          type: "Poaching",
-          location: "Bandhavgarh National Park",
-          priority: "High",
-          status: "New",
-          evidenceCount: 3,
-          anonymous: false,
-          aiScore: 85
-        },
-        {
-          id: "INC-002",
-          reportedAt: "2024-01-15T09:15:00Z",
-          type: "Habitat Destruction",
-          location: "Kanha Tiger Reserve",
-          priority: "Medium",
-          status: "Triaged",
-          evidenceCount: 2,
-          anonymous: true,
-          aiScore: 72
-        }
-      ])
+      // On failure, still attempt loading from report-analysis (no hardcoded data)
+      await loadReportAnalysis()
     } finally {
       setLoading(false)
     }
@@ -200,6 +278,19 @@ export default function NGODashboard() {
     return `${Math.floor(diffInHours / 24)}d ago`
   }
 
+  const formatDisplayTime = (dateString: string) => {
+    const d = new Date(dateString)
+    if (isNaN(d.getTime())) return '—'
+    try {
+      return new Intl.DateTimeFormat('en-GB', {
+        day: '2-digit', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', hour12: true
+      }).format(d)
+    } catch {
+      return d.toLocaleString()
+    }
+  }
+
   const updateIncidentStatus = (incidentId: string, newStatus: string) => {
     setIncidents(prevIncidents => 
       prevIncidents.map(incident => 
@@ -208,6 +299,17 @@ export default function NGODashboard() {
           : incident
       )
     )
+    ;(async () => {
+      try {
+        await fetch('/api/ngo/incidents/update-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: incidentId, status: newStatus })
+        })
+      } catch (_) {
+        // no-op
+      }
+    })()
   }
 
   const trendData =
@@ -545,9 +647,9 @@ export default function NGODashboard() {
                </div>
              </CardHeader>
                          <CardContent>
-               <div>
-                                 <Table>
-                                       <TableHeader>
+               <div className="overflow-x-auto">
+                 <Table>
+                   <TableHeader>
                       <TableRow className="border-white/20 py-6">
                         <TableHead className="w-16 text-white text-lg font-semibold py-6">Select</TableHead>
                         <TableHead className="text-white text-lg font-semibold py-6">ID</TableHead>
@@ -587,10 +689,10 @@ export default function NGODashboard() {
                              className="border-white/30 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
                            />
                          </TableCell>
-                                                  <TableCell className="font-mono text-lg text-white py-4">{incident.id}</TableCell>
-                          <TableCell className="text-lg text-gray-300 py-4">{formatTimeAgo(incident.reportedAt)}</TableCell>
-                          <TableCell className="text-lg text-white py-4">{incident.type}</TableCell>
-                          <TableCell className="text-lg text-gray-300 py-4">{incident.location}</TableCell>
+                                                  <TableCell className="font-mono text-lg text-white py-4 whitespace-nowrap">{incident.shortId}</TableCell>
+                          <TableCell className="text-lg text-gray-300 py-4 whitespace-nowrap">{formatDisplayTime(incident.reportedAt)}</TableCell>
+                          <TableCell className="text-lg text-white py-4 max-w-[220px] truncate" title={incident.type}>{incident.type}</TableCell>
+                          <TableCell className="text-lg text-gray-300 py-4 max-w-[240px] truncate" title={incident.location}>{incident.location}</TableCell>
                                                   <TableCell className="py-4">
                             <span className={`${priorityColors[incident.priority]}`}>{incident.priority}</span>
                           </TableCell>
@@ -599,7 +701,7 @@ export default function NGODashboard() {
                           </TableCell>
                                                   <TableCell className="py-4">
                             <div className="flex items-center space-x-2">
-                              <span className="text-lg text-white">{incident.evidenceCount}</span>
+                              <span className="text-lg text-white">{incident.evidence_count}</span>
                               <FileText className="h-4 w-4 text-gray-400" />
                             </div>
                           </TableCell>
@@ -698,7 +800,7 @@ export default function NGODashboard() {
                   <AlertTriangle className="h-6 w-6 text-emerald-400" />
                 </div>
                 <div>
-                  <span className="text-white font-mono text-lg">{selectedIncident?.id}</span>
+                  <span className="text-white font-mono text-lg">{selectedIncident?.shortId}</span>
                   <p className="text-sm text-gray-400">Incident Details</p>
                 </div>
                                  {selectedIncident && (
@@ -741,7 +843,7 @@ export default function NGODashboard() {
                 </TabsList>
 
                 <TabsContent value="overview" className="space-y-8">
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 shadow-lg">
                       <div className="flex items-center gap-3 mb-3">
                         <div className="p-2 bg-red-500/20 rounded-lg border border-red-500/30">
@@ -751,7 +853,7 @@ export default function NGODashboard() {
                       </div>
                       <p className="text-gray-300 text-lg">{selectedIncident.type}</p>
                     </div>
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 shadow-lg">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 shadow-lg min-w-0">
                       <div className="flex items-center gap-3 mb-3">
                         <div className="p-2 bg-blue-500/20 rounded-lg border border-blue-500/30">
                           <MapPin className="h-4 w-4 text-blue-400" />
@@ -769,8 +871,8 @@ export default function NGODashboard() {
                       </div>
                       <div className="flex items-center space-x-3">
                         <span className="text-4xl font-bold text-white">{selectedIncident.aiScore}</span>
-                        <span className="text-lg text-gray-400">/100</span>
-                        {selectedIncident.aiScore >= 80 && (
+                        <span className="text-lg text-gray-400">/10</span>
+                        {selectedIncident.aiScore  && (
                           <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>
                         )}
                       </div>
@@ -783,7 +885,7 @@ export default function NGODashboard() {
                         <h3 className="font-semibold text-white">Reporter</h3>
                       </div>
                       <p className="text-gray-300 text-lg">
-                        {selectedIncident.anonymous ? "Anonymous" : "Identified Citizen"}
+                        {selectedIncident.anonymous ? "Anonymous" : (selectedIncident.reporterName || "Identified Citizen")}
                       </p>
                     </div>
                   </div>
@@ -794,16 +896,15 @@ export default function NGODashboard() {
                        </div>
                        <h3 className="font-semibold text-white text-lg">AI Analysis Reason</h3>
                      </div>
-                     <p className="text-emerald-200 leading-relaxed">
-                       High-confidence detection of snare traps based on image analysis. Location matches known
-                       poaching corridor. Immediate response recommended.
-                     </p>
+                     <div className="text-emerald-100/90 text-base leading-7 break-words break-all whitespace-pre-line max-h-64 overflow-y-auto overflow-x-hidden pr-2 min-w-0">
+                       {selectedIncident.aiReport || '—'}
+                     </div>
                    </div>
                 </TabsContent>
 
                 <TabsContent value="evidence" className="space-y-8">
                   <div className="grid grid-cols-3 gap-6">
-                    {[...Array(selectedIncident.evidenceCount)].map((_, index) => (
+                    {[...Array(selectedIncident.evidence_count)].map((_, index) => (
                       <div key={index} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
                         <div className="flex items-center gap-3 mb-4">
                                                      <div className={`p-2 rounded-lg border ${

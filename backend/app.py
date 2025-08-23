@@ -3,13 +3,13 @@ import sys
 import json
 import tempfile
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 # Add the specific path to your detect.py
-DETECT_PATH = "C:/Users/daria/Documents/SC2/Ekonet/agent"
+DETECT_PATH = "C:/PROJECTS/StatusCode2/Ekonet/agent"
 sys.path.append(DETECT_PATH)
 
 try:
@@ -32,76 +32,176 @@ def health() -> Any:
     ok = UniversalDetector is not None
     return jsonify({"ok": ok, "details": None if ok else _import_error_message}), (200 if ok else 500)
 
-def _analyze_file(temp_path: Path) -> Dict[str, Any]:
-    """Call UniversalDetector from detect.py to analyze a single file path."""
+def _analyze_file_with_context(temp_path: Path, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Analyze file with context using UniversalDetector."""
     if UniversalDetector is None:
         raise RuntimeError(f"Failed to import detect.py: {_import_error_message}")
 
     detector = UniversalDetector()
-    return detector.analyze(str(temp_path))
+    return detector.analyze_with_context(str(temp_path), context)
+
+def _analyze_text_with_context(description: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Analyze text description with context using AI for threat assessment."""
+    if UniversalDetector is None:
+        raise RuntimeError(f"Failed to import detect.py: {_import_error_message}")
+
+    detector = UniversalDetector()
+    return detector.analyze_text_with_context(description, context)
 
 @app.post("/analyze")
 def analyze() -> Any:
-    if "files" not in request.files:
-        return jsonify({"message": "No files part in form-data (use key 'files')"}), 400
+    """
+    Unified analysis endpoint that handles both text-only and file+context analysis
+    """
+    # Get form data (always required)
+    location = request.form.get('location', '')
+    description = request.form.get('description', '')
+    threat_type = request.form.get('threatType', '')
+    coordinates = request.form.get('coordinates', '{}')
+    location_method = request.form.get('locationMethod', '')
+    is_anonymous = request.form.get('isAnonymous', 'false')
+    report_id = request.form.get('reportId', '')
+    timestamp = request.form.get('timestamp', '')
+    evidence_count = request.form.get('evidenceCount', None)
+    reporter_name = request.form.get('reporterName', '')
 
-    uploaded_files = request.files.getlist("files")
-    if not uploaded_files:
-        return jsonify({"message": "No files provided"}), 400
+    # Check if files were uploaded (optional)
+    uploaded_files = []
+    if "files" in request.files:
+        uploaded_files = request.files.getlist("files")
+        # Filter out empty files
+        uploaded_files = [f for f in uploaded_files if f and f.filename != '']
+
+    # Create unified context for all analysis
+    analysis_context = {
+        'location': location,
+        'description': description,
+        'threat_type': threat_type,
+        'coordinates': coordinates,
+        'location_method': location_method,
+        'is_anonymous': is_anonymous,
+        'report_id': report_id,
+        'timestamp': timestamp,
+        'evidence_count': int(evidence_count) if evidence_count is not None and str(evidence_count).isdigit() else None,
+        'reporter_name': reporter_name or 'anonymous'
+    }
+
+    print(f"🔍 AI Agent analyzing: {len(uploaded_files)} file(s) + context")
 
     results: List[Dict[str, Any]] = []
 
-    for f in uploaded_files:
-        if not f or f.filename == '':
-            continue
+    if uploaded_files:
+        # File + Context Analysis
+        for f in uploaded_files:
+            if not f or f.filename == '':
+                continue
             
-        # Get file extension
-        file_ext = Path(f.filename).suffix
+            print(f"📄 Analyzing file: {f.filename}")
+            
+            # Get file extension and create temp file
+            file_ext = Path(f.filename).suffix
+            with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as tmp:
+                f.save(tmp.name)
+                tmp_path = Path(tmp.name)
+
+            try:
+                # Analyze file with context
+                analysis = _analyze_file_with_context(tmp_path, analysis_context)
+                
+                # Generate output filename
+                original_name = Path(f.filename).stem
+                output_path = f"C:/PROJECTS/StatusCode2/Ekonet/backend/{original_name}_analysis.json"
+
+                # Save results
+                if UniversalDetector is not None:
+                    detector = UniversalDetector()
+                    detector.save_results(analysis, output_path)
+                    print(f"✅ Generated report: {original_name}_analysis.json")
+                
+                results.append({
+                    "analysis_type": "file_with_context",
+                    "original_filename": f.filename,
+                    "content_type": f.mimetype,
+                    "file_size": os.path.getsize(tmp_path),
+                    "analysis_result": analysis,
+                    "saved_json_path": output_path,
+                    "context_used": analysis_context
+                })
+                
+            except Exception as e:
+                print(f"❌ Analysis failed for {f.filename}: {e}")
+                results.append({
+                    "analysis_type": "file_with_context",
+                    "original_filename": f.filename,
+                    "content_type": f.mimetype,
+                    "error": str(e),
+                    "context_used": analysis_context
+                })
+            finally:
+                # Clean up temp file
+                try:
+                    os.unlink(tmp_path)
+                except OSError:
+                    pass
+    else:
+        # Text-Only Analysis
+        print(f"📝 Analyzing text description")
         
-        # Create temporary file with proper extension
-        with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as tmp:
-            f.save(tmp.name)
-            tmp_path = Path(tmp.name)
-
         try:
-            print(f"📥 Saved upload to temp path: {tmp_path}")
-            analysis = _analyze_file(tmp_path)
-            print(f"✅ Analysis successful for {f.filename}")
+            # Analyze text description with context
+            text_analysis = _analyze_text_with_context(description, analysis_context)
             
-            # Generate output filename for saving JSON
-            original_name = Path(f.filename).stem
-            output_path = f"C:/Users/daria/Documents/SC2/Ekonet/backend/{original_name}_analysis.json"
-
-            # Save the analysis results to a JSON file
+            # Generate output filename
+            output_path = f"C:/PROJECTS/StatusCode2/Ekonet/backend/text_report_{report_id}_analysis.json"
+            
+            # Save results
             if UniversalDetector is not None:
                 detector = UniversalDetector()
-                detector.save_results(analysis, output_path)
-                print(f"💾 Saved analysis to: {output_path}")
+                detector.save_results(text_analysis, output_path)
+                print(f"✅ Generated report: text_report_{report_id}_analysis.json")
             
             results.append({
-                "original_filename": f.filename,
-                "content_type": f.mimetype,
-                "file_size": os.path.getsize(tmp_path),
-                "analysis_result": analysis,
-                "saved_json_path": output_path
+                "analysis_type": "text_only",
+                "location": location,
+                "description": description,
+                "threat_type": threat_type,
+                "coordinates": coordinates,
+                "location_method": location_method,
+                "is_anonymous": is_anonymous,
+                "report_id": report_id,
+                "timestamp": timestamp,
+                "analysis_result": text_analysis,
+                "saved_json_path": output_path,
+                "context_used": analysis_context,
+                "message": "Text-only report analyzed successfully"
             })
+            
         except Exception as e:
-            print(f"❌ Analysis failed for {f.filename}: {e}")
+            print(f"❌ Text analysis failed: {e}")
             results.append({
-                "original_filename": f.filename,
-                "content_type": f.mimetype,
+                "analysis_type": "text_only",
+                "location": location,
+                "description": description,
+                "threat_type": threat_type,
+                "coordinates": coordinates,
+                "location_method": location_method,
+                "is_anonymous": is_anonymous,
+                "report_id": report_id,
+                "timestamp": timestamp,
                 "error": str(e),
+                "context_used": analysis_context,
+                "message": "Text analysis failed"
             })
-        finally:
-            # Clean up temporary file
-            try:
-                os.unlink(tmp_path)
-            except OSError:
-                pass
 
+    # Return unified response
+    files_analyzed = len([r for r in results if r.get("analysis_type") == "file_with_context"])
+    text_analyzed = len([r for r in results if r.get("analysis_type") == "text_only"])
+    
     return jsonify({
-        "message": "analysis complete", 
-        "files_analyzed": len(results), 
+        "message": "unified analysis complete",
+        "files_analyzed": files_analyzed,
+        "text_only_reports": text_analyzed,
+        "total_analyses": len(results),
         "results": results
     })
 

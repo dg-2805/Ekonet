@@ -74,12 +74,13 @@ class UniversalDetector:
         
         return 'unknown'
     
-    def analyze(self, file_path: str) -> Dict[str, Any]:
+    def analyze_with_context(self, file_path: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
-        Analyze any file type and return results
+        Analyze any file type with context and return results
         
         Args:
             file_path: Path to the file to analyze
+            context: Context information including location, description, threat_type, etc.
             
         Returns:
             Analysis results as dictionary
@@ -107,16 +108,15 @@ class UniversalDetector:
                 }
                 return self._add_metadata(error_result, file_path, file_type)
             
-            # Route to appropriate analyzer
-            print(f"🔍 Detected file type: {file_type}")
-            print(f"📁 Analyzing: {file_path}")
+            # Route to appropriate analyzer with context
+            print(f"🔍 Analyzing {file_type}: {Path(file_path).name}")
             
             if file_type == 'image':
-                result = self.image_analyzer.analyze(file_path)
+                result = self.image_analyzer.analyze_with_context(file_path, context)
             elif file_type == 'video':
-                result = self.video_analyzer.analyze(file_path)
+                result = self.video_analyzer.analyze_with_context(file_path, context)
             elif file_type == 'audio':
-                result = self.audio_analyzer.analyze(file_path)
+                result = self.audio_analyzer.analyze_with_context(file_path, context)
             else:
                 error_result = {
                     "error": f"Unsupported file type: {file_type}",
@@ -135,6 +135,89 @@ class UniversalDetector:
                 "message": f"❌ Analysis failed: {e}"
             }
             return self._add_metadata(error_result, file_path, "unknown")
+    
+    def analyze(self, file_path: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Legacy method - redirects to analyze_with_context for backward compatibility
+        """
+        return self.analyze_with_context(file_path, context)
+    
+    def analyze_text_with_context(self, description: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Analyze text description with context for threat assessment
+        
+        Args:
+            description: Text description of the threat/incident
+            context: Context information including location, description, threat_type, etc.
+            
+        Returns:
+            Analysis results as dictionary
+        """
+        try:
+            print(f"📝 Analyzing text description")
+            
+            # Use the image analyzer's text analysis capability
+            result = self.image_analyzer.analyze_text_with_context(description, context)
+            
+            # Add metadata for text analysis
+            return self._add_text_metadata(result, description)
+            
+        except Exception as e:
+            error_result = {
+                "error": str(e),
+                "status": "failed",
+                "message": f"❌ Text analysis failed: {e}"
+            }
+            return self._add_text_metadata(error_result, description)
+    
+    def analyze_text(self, description: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Legacy method - redirects to analyze_text_with_context for backward compatibility
+        """
+        return self.analyze_text_with_context(description, context)
+    
+    def _add_text_metadata(self, result: Dict[str, Any], description: str) -> Dict[str, Any]:
+        """
+        Add metadata for text analysis results
+        
+        Args:
+            result: The analysis result
+            description: The original text description
+            
+        Returns:
+            Dict with added metadata
+        """
+        text_metadata = {
+            "metadata": {
+                "analysis_type": "text",
+                "timestamp": self._get_timestamp(),
+                "source": "text_description",
+                "model": "gemini-2.5-flash",
+                "universal_detector": {
+                    "detected_file_type": "text",
+                    "analysis_timestamp": self._get_timestamp(),
+                    "file_info": {
+                        "path": "text_description",
+                        "name": "text_description",
+                        "size_bytes": len(description.encode('utf-8')),
+                        "size_mb": round(len(description.encode('utf-8')) / (1024 * 1024), 4),
+                        "extension": ".txt",
+                        "created": self._get_timestamp(),
+                        "modified": self._get_timestamp()
+                    },
+                    "version": "1.0.0"
+                }
+            }
+        }
+        
+        if isinstance(result, dict):
+            # Merge with existing metadata if present
+            if "metadata" in result:
+                result["metadata"].update(text_metadata["metadata"])
+            else:
+                result.update(text_metadata)
+        
+        return result
     
     def _add_metadata(self, result: Dict[str, Any], file_path: str, file_type: str) -> Dict[str, Any]:
         """

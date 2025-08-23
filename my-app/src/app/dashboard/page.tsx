@@ -85,7 +85,17 @@ export default function CitizenDashboard() {
 
   const fetchData = async () => {
     try {
-      const [summaryRes, reportsRes] = await Promise.all([fetch("/api/reporter/summary"), fetch("/api/reporter/reports")])
+      let reporterName: string | undefined
+      try {
+        const storedUser = typeof window !== 'undefined' ? localStorage.getItem('user') : null
+        reporterName = storedUser ? (JSON.parse(storedUser)?.name as string | undefined) : undefined
+      } catch {}
+
+      const qs = reporterName ? `?reporterName=${encodeURIComponent(reporterName)}` : ''
+      const [summaryRes, reportsRes] = await Promise.all([
+        fetch(`/api/reporter/summary${qs}`),
+        fetch(`/api/reporter/reports${qs}`)
+      ])
 
       const summaryData = await summaryRes.json()
       const reportsData = await reportsRes.json()
@@ -126,13 +136,9 @@ export default function CitizenDashboard() {
     : []
 
            const Sidebar = () => (
-      <div className="w-64 bg-white/10 backdrop-blur-xl border-r border-white/20 h-screen fixed pt-20 left-0 flex flex-col">
+      <div className="w-64 bg-white/10 backdrop-blur-xl border-r border-white/20 h-screen fixed pt-24 left-0 flex flex-col">
         <nav className="px-4 space-y-2 flex-1">
         <Button variant="ghost" className="w-full justify-start bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-          <Home className="mr-3 h-4 w-4" />
-          Overview
-        </Button>
-        <Button variant="ghost" className="w-full justify-start text-white hover:bg-white/20">
           <FileBarChart className="mr-3 h-4 w-4" />
           My Reports
         </Button>
@@ -220,21 +226,12 @@ export default function CitizenDashboard() {
                </div>
                <div>
                  <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground">
-                   Citizen <span className="text-gradient-nature">DASHBOARD</span>
+                   My <span className="text-gradient-nature">Reports</span>
                  </h1>
-                 <p className="text-lg text-gray-300 mt-2">Track your reports & updates</p>
+                 <p className="text-lg text-gray-300 mt-2">Your submitted incidents & progress</p>
                </div>
              </div>
-            <div className="flex space-x-3">
-              <Button variant="outline" className="flex-1 md:flex-none bg-white/10 border-white/20 text-white hover:bg-white/20">
-                <Share2 className="mr-2 h-4 w-4" />
-                Share App
-              </Button>
-              <Button className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold shadow-2xl shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all duration-300 transform hover:scale-105 flex-1 md:flex-none">
-                <Plus className="mr-2 h-4 w-4" />
-                New Report
-              </Button>
-            </div>
+           <div className="flex space-x-3"></div>
           </motion.div>
 
           {/* KPI Cards */}
@@ -340,7 +337,7 @@ export default function CitizenDashboard() {
              transition={{ delay: 0.3 }}
              className="space-y-6"
            >
-             <h2 className="text-2xl font-semibold text-white">Active Reports</h2>
+             <h2 className="text-2xl font-semibold text-white">My Active Reports</h2>
 
              {reports.length === 0 ? (
                <Card className="rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl shadow-2xl shadow-black/20">
@@ -556,3 +553,4 @@ export default function CitizenDashboard() {
     </div>
   )
 }
+

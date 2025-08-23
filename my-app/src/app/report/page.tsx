@@ -12,7 +12,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Switch } from "@/components/ui/switch"
 import { Trash2, Upload, Check, Camera, Video, Mic, Shield, AlertTriangle, MapPin, Loader2, Brain } from "lucide-react"
 import { Label } from "@/components/ui/label"
-// import MapPicker from "@/components/MapPicker"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import MapPicker from "@/components/component/MapPicker"
 
 interface UploadedFile {
   id: string
@@ -21,9 +22,6 @@ interface UploadedFile {
   type: "image" | "video" | "audio"
   url: string
   file: File
-  isAnalyzing: boolean
-  analysisResult?: any
-  analysisError?: string
 }
 
 interface ThreatFormData {
@@ -44,8 +42,30 @@ interface ThreatFormData {
 const ThreatReporting = () => {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoadingLocation, setIsLoadingLocation] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [showMapPicker, setShowMapPicker] = useState(false)
   const [isMapPickerOpen, setIsMapPickerOpen] = useState(false)
+  const [pendingMapCoords, setPendingMapCoords] = useState<{ lat: number | null; lng: number | null }>({ lat: null, lng: null })
+  const commitMapSelection = () => {
+    if (pendingMapCoords.lat !== null && pendingMapCoords.lng !== null) {
+      const lat = pendingMapCoords.lat
+      const lng = pendingMapCoords.lng
+      setFormData((prev) => ({
+        ...prev,
+        coordinates: { latitude: lat, longitude: lng },
+        locationMethod: "map",
+        location: `Map location (${lat.toFixed(6)}, ${lng.toFixed(6)})`,
+      }))
+    }
+  }
+  const cancelMapSelection = () => {
+    setPendingMapCoords({ lat: null, lng: null })
+    setIsMapPickerOpen(false)
+  }
+  const confirmMapLocation = () => {
+    commitMapSelection()
+    setIsMapPickerOpen(false)
+  }
 
   const [formData, setFormData] = useState<ThreatFormData>({
     threatType: "",
@@ -65,10 +85,11 @@ const ThreatReporting = () => {
   const threatTypes = [
     "Poaching",
     "Habitat Loss",
-    "Pollution",
-    "Climate Change",
     "Illegal Wildlife Trade",
-    "Deforestation",
+    "Human Wildlife Conflict",
+    "Medical Care",
+    "Habitat Restoration",
+    "Species Recovery",
     "Other",
   ]
 
@@ -80,7 +101,7 @@ const ThreatReporting = () => {
 
     setIsLoadingLocation(true)
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const { latitude, longitude } = position.coords
         setFormData((prev) => ({
           ...prev,
@@ -88,77 +109,57 @@ const ThreatReporting = () => {
           locationMethod: "current",
           location: `Current location (${latitude.toFixed(6)}, ${longitude.toFixed(6)})`,
         }))
+        // Also reflect in pending map coords for consistency
+        setPendingMapCoords({ lat: latitude, lng: longitude })
         setIsLoadingLocation(false)
       },
-      (error) => {
-        console.error("Error getting location:", error)
-        alert("Unable to get your current location. Please enter location manually.")
+      async (error) => {
+        // Try an approximate IP-based fallback if precise geolocation fails
+        try {
+          const res = await fetch('https://ipapi.co/json/')
+          if (res.ok) {
+            const data = await res.json()
+            const latitude = typeof data.latitude === 'number' ? data.latitude : parseFloat(data.latitude)
+            const longitude = typeof data.longitude === 'number' ? data.longitude : parseFloat(data.longitude)
+            if (!isNaN(latitude) && !isNaN(longitude)) {
+              setFormData((prev) => ({
+                ...prev,
+                coordinates: { latitude, longitude },
+                locationMethod: "current",
+                location: `Approximate location (${latitude.toFixed(6)}, ${longitude.toFixed(6)})`,
+              }))
+              setPendingMapCoords({ lat: latitude, lng: longitude })
+              setIsLoadingLocation(false)
+              return
+            }
+          }
+        } catch (_) {
+          // ignore and fall through to alert
+        }
+        alert("Unable to get your current location. Please enter location manually or pick on the map.")
         setIsLoadingLocation(false)
       },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     )
   }
 
   const handleMapLocationSelect = (lat: number, lng: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      coordinates: { latitude: lat, longitude: lng },
-      locationMethod: "map",
-      location: `Map location (${lat.toFixed(6)}, ${lng.toFixed(6)})`,
-    }))
+    setPendingMapCoords({ lat, lng })
   }
 
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5002';
 
+  // This function is no longer needed since analysis happens on submit
+  // Keeping it for potential future use but not calling it automatically
   const analyzeFile = async (fileEntry: UploadedFile) => {
-    try {
-      const form = new FormData();
-      form.append('files', fileEntry.file, fileEntry.name);
-      form.append('location', formData.location);
-      form.append('description', formData.threatDescription);
-      
-      const resp = await fetch(`${BACKEND_URL}/analyze`, {
-        method: 'POST',
-        body: form
-      });
-
-      const data = await resp.json();
-      console.log('🔍 Backend response:', data);
-      const result = Array.isArray(data?.results) ? data.results[0] : null;
-      console.log('📊 Analysis result:', result);
-
-      if (!resp.ok || !result) {
-        throw new Error(result?.error || data?.message || 'Analysis failed');
-      }
-
-      updateFileById(fileEntry.id, f => ({
-        ...f,
-        isAnalyzing: false,
-        analysisResult: result,
-        analysisError: undefined
-      }));
-    } catch (err: any) {
-      updateFileById(fileEntry.id, f => ({
-        ...f,
-        isAnalyzing: false,
-        analysisError: err?.message || 'Analysis error'
-      }));
-    }
   };
 
-  // Update a file entry by id across all media lists
+  // This function is no longer needed since we don't update files after upload
+  // Keeping it for potential future use
   const updateFileById = (
     id: string,
     updater: (file: UploadedFile) => UploadedFile
   ) => {
-    setFormData(prev => {
-      const updateList = (list: UploadedFile[]) => list.map(f => (f.id === id ? updater(f) : f));
-      return {
-        ...prev,
-        images: updateList(prev.images),
-        videos: updateList(prev.videos),
-        audio: updateList(prev.audio)
-      };
-    });
   };
 
   const handleFileUpload = (files: FileList | null) => {
@@ -170,10 +171,7 @@ const ThreatReporting = () => {
       size: (file.size / 1024 / 1024).toFixed(2) + " MB",
       type: file.type.includes("image") ? "image" : file.type.includes("video") ? "video" : "audio",
       url: URL.createObjectURL(file),
-      file: file,
-      isAnalyzing: true,
-      analysisResult: undefined,
-      analysisError: undefined
+      file: file
     }))
 
     setFormData((prev) => ({
@@ -184,8 +182,7 @@ const ThreatReporting = () => {
       ],
     }))
 
-    // Trigger backend analysis for each new file
-    newFiles.forEach(f => analyzeFile(f));
+    // No longer trigger automatic analysis - wait for submit button
   }
 
   const removeFile = (id: string) => {
@@ -204,10 +201,60 @@ const ThreatReporting = () => {
     }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Submitted data:", formData)
-    setIsSubmitted(true)
+    
+    setIsSubmitting(true)
+    
+    try {
+      
+      // Create FormData with all form data and files
+      const submitFormData = new FormData()
+      
+      // Add form fields (always required)
+      submitFormData.append('threatType', formData.threatType)
+      submitFormData.append('location', formData.location)
+      submitFormData.append('threatDescription', formData.threatDescription)
+      submitFormData.append('coordinates', JSON.stringify(formData.coordinates))
+      submitFormData.append('locationMethod', formData.locationMethod)
+      submitFormData.append('isAnonymous', formData.isAnonymous.toString())
+      // Reporter name from localStorage user (if available)
+      try {
+        const storedUser = typeof window !== 'undefined' ? localStorage.getItem('user') : null
+        const reporterName = storedUser ? (JSON.parse(storedUser)?.name as string | undefined) : undefined
+        if (reporterName) {
+          submitFormData.append('reporterName', reporterName)
+        }
+      } catch {}
+      
+      // Add files only if they exist (optional)
+      const allFiles = [...formData.images, ...formData.videos, ...formData.audio]
+      // Add evidence count for AI context
+      submitFormData.append('evidenceCount', allFiles.length.toString())
+      if (allFiles.length > 0) {
+        allFiles.forEach(file => {
+          submitFormData.append('files', file.file)
+        })
+      }
+      
+      // Send to our new API route
+      const response = await fetch('/api/agent', {
+        method: 'POST',
+        body: submitFormData
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Submission failed: ${response.statusText}`)
+      }
+      
+      const result = await response.json()
+      
+      setIsSubmitted(true)
+    } catch (error) {
+      alert("Failed to submit report. Please try again.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (isSubmitted) {
@@ -335,11 +382,17 @@ const ThreatReporting = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => setShowMapPicker(!showMapPicker)}
+                      onClick={() => {
+                        setIsMapPickerOpen(true)
+                        setPendingMapCoords({
+                          lat: formData.coordinates.latitude,
+                          lng: formData.coordinates.longitude,
+                        })
+                      }}
                       className="flex items-center gap-3 px-6 py-4 h-auto bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30 transition-all duration-200"
                     >
                       <MapPin className="h-5 w-5" />
-                      {showMapPicker ? "Hide Map" : "Pick on Map"}
+                      Pick on Map
                     </Button>
 
                     <Button
@@ -376,14 +429,87 @@ const ThreatReporting = () => {
                     </Alert>
                   )}
 
-                  {/* {showMapPicker && (
-                    <MapPicker
-                      latitude={formData.coordinates.latitude}
-                      longitude={formData.coordinates.longitude}
-                      onLocationSelect={handleMapLocationSelect}
-                      className="mt-4"
-                    />
-                  )} */}
+                  {/* Map Picker Modal */}
+                  <Dialog open={isMapPickerOpen} onOpenChange={setIsMapPickerOpen}>
+                    <DialogContent className="max-w-6xl w-[95vw] h-[85vh] bg-background/95 backdrop-blur-xl border border-white/20 text-white rounded-2xl shadow-2xl shadow-black/40 p-0 overflow-hidden">
+                      <DialogHeader className="sr-only">
+                        <DialogTitle>Select Location on Map</DialogTitle>
+                      </DialogHeader>
+                      <div className="flex flex-col h-full">
+                        {/* Header */}
+                        <div className="p-8 border-b border-white/20 bg-white/5">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4 flex-1 min-w-0">
+                              <div className="p-3 bg-emerald-500/20 rounded-xl border border-emerald-500/30 shadow-lg flex-shrink-0">
+                                <MapPin className="h-8 w-8 text-emerald-400" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <h2 className="text-2xl font-bold text-white">Select Location on Map</h2>
+                                <p className="text-slate-300 text-lg mt-1">Click on the map to choose the exact location</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3 flex-shrink-0 ml-6">
+                              <div className="px-4 py-2 bg-emerald-500/20 rounded-lg border border-emerald-500/30 max-w-[260px]">
+                                <span className="text-emerald-400 font-medium text-sm truncate block">
+                                  {pendingMapCoords.lat !== null && pendingMapCoords.lng !== null
+                                    ? `Selected: ${pendingMapCoords.lat.toFixed(4)}, ${pendingMapCoords.lng.toFixed(4)}`
+                                    : formData.coordinates.latitude && formData.coordinates.longitude
+                                    ? `Current: ${formData.coordinates.latitude.toFixed(4)}, ${formData.coordinates.longitude.toFixed(4)}`
+                                    : 'No location selected'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Map Container */}
+                        <div className="flex-1 p-8 bg-gradient-to-br from-slate-900/50 to-slate-800/50">
+                          <div className="h-full rounded-xl overflow-hidden border border-white/20 shadow-2xl bg-white/5 backdrop-blur-sm relative">
+                            <div className="h-full w-full" style={{ touchAction: 'none' }}>
+                              <MapPicker
+                                latitude={pendingMapCoords.lat ?? formData.coordinates.latitude}
+                                longitude={pendingMapCoords.lng ?? formData.coordinates.longitude}
+                                onLocationSelect={handleMapLocationSelect}
+                                className="w-full h-full"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="p-6 border-t border-white/20 bg-white/5">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-2 text-slate-300">
+                                <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                                <span className="text-sm">Click to select location</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-slate-300">
+                                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                <span className="text-sm">Current position</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <Button
+                                variant="outline"
+                                onClick={cancelMapSelection}
+                                className="px-6 py-3 bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30"
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                onClick={confirmMapLocation}
+                                disabled={pendingMapCoords.lat === null || pendingMapCoords.lng === null}
+                                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                Confirm Location
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
 
                   <Textarea
                     placeholder="Describe the location where you observed the threat. Include landmarks, nearby roads, or any identifying features..."
@@ -450,10 +576,10 @@ const ThreatReporting = () => {
                   <div className="p-2 bg-purple-500/20 rounded-lg border border-purple-500/30">
                     <Upload className="h-6 w-6 text-purple-400" />
                   </div>
-                  Upload Evidence
+                  Upload Evidence (Optional)
                 </CardTitle>
                 <p className="text-base text-gray-300">
-                  Add photos, videos, or audio recordings to support your report
+                  Add photos, videos, or audio recordings to support your report. This is optional - you can submit a report with just the description.
                 </p>
               </CardHeader>
               <CardContent>
@@ -469,23 +595,21 @@ const ThreatReporting = () => {
               <Button
                 type="submit"
                 className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-semibold text-lg px-12 py-6 rounded-xl shadow-2xl shadow-red-500/25 hover:shadow-2xl hover:shadow-red-500/40 transition-all duration-300 transform hover:scale-105"
-                disabled={!formData.threatType || !formData.threatDescription.trim() || !formData.location.trim()}
+                disabled={!formData.threatType || !formData.threatDescription.trim() || !formData.location.trim() || isSubmitting}
               >
-                Submit Threat Report
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                    Analyzing & Submitting...
+                  </>
+                ) : (
+                  "Submit Threat Report"
+                )}
               </Button>
             </div>
           </form>
         </div>
       </div>
-
-        {/* {showMapPicker && (
-         <MapPicker
-           latitude={formData.coordinates.latitude}
-           longitude={formData.coordinates.longitude}
-           onLocationSelect={handleMapLocationSelect}
-           className="mt-4"
-         />
-       )} */}
     </div>
   )
 }
@@ -687,24 +811,9 @@ const UnifiedUploadSection = ({
                     <span className="text-slate-400">{file.size}</span>
                   </div>
                   <div className="mt-2 text-xs">
-                    {file.isAnalyzing ? (
-                      <span className="inline-flex items-center gap-1 text-slate-300">
-                        <Loader2 className="h-3 w-3 animate-spin" /> Analyzing...
-                      </span>
-                    ) : file.analysisError ? (
-                      <span className="text-red-400">Error: {file.analysisError}</span>
-                    ) : file.analysisResult ? (
-                      <div className="space-y-1">
-                        <span className="inline-flex items-center gap-1 text-emerald-400">
-                          <Brain className="h-3 w-3" /> Analyzed
-                        </span>
-                        {file.analysisResult.analysis_result?.species?.common_name && (
-                          <div className="text-xs text-slate-300">
-                            {file.analysisResult.analysis_result.species.common_name}
-                          </div>
-                        )}
-                      </div>
-                    ) : null}
+                    <span className="inline-flex items-center gap-1 text-slate-300">
+                      <Upload className="h-3 w-3" /> Ready for analysis
+                    </span>
                   </div>
                 </div>
 
