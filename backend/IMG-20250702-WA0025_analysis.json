@@ -1,0 +1,80 @@
+{
+  "species": {
+    "scientific_name": "Homo sapiens",
+    "genus": "Homo",
+    "species_epithet": "sapiens",
+    "subspecies": null,
+    "common_name": "Human",
+    "other_common_names": [
+      "Person",
+      "Man",
+      "Woman"
+    ],
+    "confidence": 100,
+    "taxonomy": {
+      "class": "Mammalia",
+      "order": "Primates",
+      "family": "Hominidae"
+    },
+    "distinguishing_features": [
+      "Bipedal posture",
+      "Complex clothing and accessories (glasses, watches, badges)",
+      "Facial features and body structure typical of Homo sapiens",
+      "Presence of cultural artifacts (event banners, signs)"
+    ],
+    "similar_candidates": []
+  },
+  "conservation": {
+    "iucn_status": "Least Concern",
+    "protected_status": "Not applicable"
+  },
+  "danger_profile": {
+    "is_venomous": false,
+    "is_poisonous": false,
+    "toxicity_level": "unknown",
+    "primary_toxins": [],
+    "threat_to_humans": "Varies greatly depending on individual and context; generally low in this social setting.",
+    "evidence": "Image shows a social gathering; no signs of aggression or immediate threat."
+  },
+  "health_indicators": {
+    "age_sex": "Mixed group of adults, both male and female",
+    "visible_injuries": [],
+    "condition": "Appear to be in good health"
+  },
+  "habitat_context": {
+    "environment": "Indoor event space/conference hall",
+    "human_impact": "High (constructed environment, organized event)"
+  },
+  "threat_analysis": {
+    "illegal_activity_detected": false,
+    "evidence": [],
+    "weapons_traps": [],
+    "suspicious_activity": []
+  },
+  "risk_assessment": {
+    "level": 1,
+    "justification": "The image depicts a group of humans in a social, organized setting (a hackathon). There are no visible threats, injuries, or signs of distress. The environment is a safe, indoor, human-controlled space.",
+    "urgency": "Low"
+  },
+  "recommended_actions": [],
+  "metadata": {
+    "analysis_type": "image",
+    "timestamp": "2025-08-23T17:07:30.304043",
+    "source": "C:\\Users\\daria\\AppData\\Local\\Temp\\tmp7758b8qy.jpg",
+    "model": "gemini-2.5-flash",
+    "universal_detector": {
+      "detected_file_type": "image",
+      "analysis_timestamp": "2025-08-23T17:07:30.304043",
+      "file_info": {
+        "path": "C:\\Users\\daria\\AppData\\Local\\Temp\\tmp7758b8qy.jpg",
+        "name": "tmp7758b8qy.jpg",
+        "size_bytes": 215966,
+        "size_mb": 0.21,
+        "extension": ".jpg",
+        "created": "2025-08-23T17:07:19.434903",
+        "modified": "2025-08-23T17:07:19.434903"
+      },
+      "version": "1.0.0"
+    }
+  }
+}
