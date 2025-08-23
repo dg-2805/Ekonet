@@ -517,11 +517,12 @@ export default function NGODashboard() {
              </CardHeader>
              <CardContent>
                <div className="bg-gradient-to-br from-emerald-500/10 to-blue-500/10 rounded-xl h-106 flex items-center justify-center border border-white/20">
-                 <div className="text-center">
-                   <MapPin className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                   <p className="text-gray-300 text-xl">Interactive map would be rendered here</p>
-                   <p className="text-lg text-gray-400 mt-2">Showing incident density by region</p>
-                 </div>
+                 <iframe
+                   src="/wildlife_clustering.html"
+                   title="Wildlife Incident Clusters Map"
+                   className="w-full h-[600px] rounded-xl border-none"
+                   style={{ minHeight: 500, background: "transparent" }}
+                 />
                </div>
                              <div className="flex items-center justify-between mt-6">
                  <div className="flex items-center space-x-6">

@@ -9,6 +9,10 @@ const UserSchema = new Schema({
   orgName: { type: String },
   description: { type: String },
   location: { type: String },
+  locationCoords: {
+    lat: { type: Number },
+    lng: { type: Number }
+  },
   license: { type: String }, // or licenseFileUrl if uploading
 
   createdAt: { type: Date, default: Date.now },

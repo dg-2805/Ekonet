@@ -9,7 +9,7 @@ const typedClientPromise: Promise<MongoClient> = clientPromise;
 
 export async function POST(req: Request) {
   try {
-    let email, password, name, role, orgName, description, location;
+  let email, password, name, role, orgName, description, location, locationLat, locationLng;
     let licenseDocument, licenseExpiry, licenseAuthority;
     let body;
     const contentType = req.headers.get('content-type') || '';
@@ -21,7 +21,9 @@ export async function POST(req: Request) {
       role = formData.get('role');
       orgName = formData.get('orgName');
       description = formData.get('description');
-      location = formData.get('location');
+  location = formData.get('location');
+  locationLat = formData.get('locationLat');
+  locationLng = formData.get('locationLng');
       licenseDocument = formData.get('licenseDocument');
       licenseExpiry = formData.get('licenseExpiry');
       licenseAuthority = formData.get('licenseAuthority');
@@ -33,7 +35,9 @@ export async function POST(req: Request) {
       role = body.role;
       orgName = body.orgName;
       description = body.description;
-      location = body.location;
+  location = body.location;
+  locationLat = body.locationLat;
+  locationLng = body.locationLng;
       licenseDocument = body.licenseDocument;
       licenseExpiry = body.licenseExpiry;
       licenseAuthority = body.licenseAuthority;
@@ -100,6 +104,12 @@ export async function POST(req: Request) {
       name,
       role,
       location: location || '',
+      ...(role === 'ngo' && {
+        locationCoords: {
+          lat: locationLat && !isNaN(Number(locationLat)) ? Number(locationLat) : null,
+          lng: locationLng && !isNaN(Number(locationLng)) ? Number(locationLng) : null
+        }
+      }),
       createdAt: new Date(),
       updatedAt: new Date(),
       isActive: true,

@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
+import MapPicker from "@/components/component/MapPicker"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -31,6 +32,8 @@ interface NGOForm {
   orgName: string;
   description: string;
   location: string;
+  locationLat: string;
+  locationLng: string;
   licenseDocument: File | null;
   licenseExpiry: string;
   licenseAuthority: string;
@@ -58,17 +61,26 @@ export default function AuthModal({ open, mode, onClose }: AuthModalProps) {
     confirmPassword: ""
   });
   const [ngoForm, setNGOForm] = useState<NGOForm>({
-    name: "",
-    email: "",
-    orgName: "",
-    description: "",
-    location: "",
-    licenseDocument: null,
-    licenseExpiry: "",
-    licenseAuthority: "",
-    password: "",
-    confirmPassword: ""
-  });
+  name: "",
+  email: "",
+  orgName: "",
+  description: "",
+  location: "",
+  locationLat: "",
+  locationLng: "",
+  licenseDocument: null,
+  licenseExpiry: "",
+  licenseAuthority: "",
+  password: "",
+  confirmPassword: ""
+});
+
+  // Map picker logic
+  const [mapPickerOpen, setMapPickerOpen] = useState(false);
+  const handleMapPick = (lat: number, lng: number) => {
+    setNGOForm(prev => ({ ...prev, locationLat: lat.toString(), locationLng: lng.toString() }));
+    setMapPickerOpen(false);
+  };
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [authMode, setAuthMode] = useState<AuthMode>(mode)
 
@@ -160,6 +172,13 @@ export default function AuthModal({ open, mode, onClose }: AuthModalProps) {
       showMessage("Passwords don't match!");
       return;
     }
+    // Validate coordinates
+    const lat = parseFloat(ngoForm.locationLat);
+    const lng = parseFloat(ngoForm.locationLng);
+    if (isNaN(lat) || isNaN(lng)) {
+      showMessage("Please select a valid latitude and longitude for your NGO location.");
+      return;
+    }
     setIsSubmitting(true);
     try {
       const formData = new FormData();
@@ -169,6 +188,8 @@ export default function AuthModal({ open, mode, onClose }: AuthModalProps) {
       formData.append("orgName", ngoForm.orgName);
       formData.append("description", ngoForm.description);
       formData.append("location", ngoForm.location);
+      formData.append("locationLat", lat.toString());
+      formData.append("locationLng", lng.toString());
       if (ngoForm.licenseDocument) {
         formData.append("licenseDocument", ngoForm.licenseDocument);
       }
@@ -201,7 +222,6 @@ export default function AuthModal({ open, mode, onClose }: AuthModalProps) {
   };
 
   if (!open) return null
-
   return (
     <div
       className="fixed inset-0 z-[100] grid place-items-center bg-black/60 p-4 backdrop-blur-sm"
@@ -432,6 +452,37 @@ export default function AuthModal({ open, mode, onClose }: AuthModalProps) {
                           className="bg-input border-border focus:ring-ring"
                           required
                         />
+                        <div className="flex gap-2 mt-2">
+                          <Input
+                            type="number"
+                            placeholder="Latitude"
+                            value={ngoForm.locationLat}
+                            onChange={e => setNGOForm((prev) => ({ ...prev, locationLat: e.target.value }))}
+                          />
+                          <Input
+                            type="number"
+                            placeholder="Longitude"
+                            value={ngoForm.locationLng}
+                            onChange={e => setNGOForm((prev) => ({ ...prev, locationLng: e.target.value }))}
+                          />
+                          <Button type="button" variant="outline" onClick={() => setMapPickerOpen(true)}>
+                            Pick on Map
+                          </Button>
+                        </div>
+                        {mapPickerOpen && (
+                          <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+                            <div className="bg-white rounded-xl p-6 shadow-xl w-[520px] h-[600px] relative">
+                              <Button className="absolute top-2 right-2" onClick={() => setMapPickerOpen(false)}>Close</Button>
+                              <div style={{ width: '100%', height: '90%' }}>
+                                <MapPicker
+                                  latitude={ngoForm.locationLat ? parseFloat(ngoForm.locationLat) : null}
+                                  longitude={ngoForm.locationLng ? parseFloat(ngoForm.locationLng) : null}
+                                  onLocationSelect={handleMapPick}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="ngo-license-document">Upload License Document</Label>
