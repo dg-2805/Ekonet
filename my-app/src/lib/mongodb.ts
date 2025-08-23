@@ -1,135 +1,94 @@
-// ===== lib/mongodb.ts =====
-import { MongoClient } from 'mongodb';
+// lib/mongodb.ts - Updated MongoDB connection with SSL fix
 
-const uri = process.env.MONGODB_URI || '';
-const options = {};
+import { MongoClient, MongoClientOptions } from 'mongodb';
+
+if (!process.env.MONGODB_URI) {
+  throw new Error('Invalid/Missing environment variable: "MONGODB_URI"');
+}
+
+const uri = process.env.MONGODB_URI;
+
+// Configure MongoDB options to handle SSL issues
+const options: MongoClientOptions = {
+  // SSL/TLS Configuration
+  tls: true,
+  tlsAllowInvalidCertificates: false,
+  tlsAllowInvalidHostnames: false,
+  
+  // Connection pool settings
+  maxPoolSize: 10,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+  
+  // Retry settings
+  retryWrites: true,
+  retryReads: true,
+  
+  // For MongoDB Atlas, these are usually not needed but can help
+  // ssl: true,
+  // sslValidate: true,
+};
 
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
-// Extend the global type to include our MongoDB promise
-declare global {
-  var _mongoClientPromise: Promise<MongoClient> | undefined;
-}
-
-if (!uri) {
-  throw new Error('Please add your MongoDB URI to .env.local');
-}
-
 if (process.env.NODE_ENV === 'development') {
-  if (!global._mongoClientPromise) {
+  // In development mode, use a global variable so that the value
+  // is preserved across module reloads caused by HMR (Hot Module Replacement).
+  let globalWithMongo = global as typeof globalThis & {
+    _mongoClientPromise?: Promise<MongoClient>;
+  };
+
+  if (!globalWithMongo._mongoClientPromise) {
     client = new MongoClient(uri, options);
-    global._mongoClientPromise = client.connect();
+    globalWithMongo._mongoClientPromise = client.connect();
   }
-  clientPromise = global._mongoClientPromise;
+  clientPromise = globalWithMongo._mongoClientPromise;
 } else {
+  // In production mode, it's best to not use a global variable.
   client = new MongoClient(uri, options);
   clientPromise = client.connect();
 }
 
-export default clientPromise;
-
-// ===== lib/auth.ts (Frontend Authentication Utils) =====
-interface AuthFormData {
-  email: string;
-  password: string;
-  [key: string]: any;
-}
-
-interface AuthResponse {
-  message?: string;
-  error?: string;
-  token?: string;
-  user?: {
-    id: string;
-    email: string;
-  };
-}
-
-export async function handleSignup(formData: AuthFormData): Promise<AuthResponse> {
+// Alternative connection with manual SSL configuration
+export const connectToDatabase = async (): Promise<MongoClient> => {
   try {
-    const res = await fetch('/api/auth/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: formData.email,
-        password: formData.password,
-        // add other fields as needed
-      }),
-    });
+    const client = await clientPromise;
     
-    const data: AuthResponse = await res.json();
+    // Test the connection
+    await client.db().admin().ping();
+    console.log('Successfully connected to MongoDB');
     
-    if (res.ok) {
-      // Success - you can handle UI updates here or in the calling component
-      console.log('Signup successful:', data.message);
-      return data;
-    } else {
-      // Error occurred
-      console.error('Signup error:', data.error);
-      return data;
-    }
+    return client;
   } catch (error) {
-    console.error('Network error during signup:', error);
-    return { error: 'Network error. Please try again.' };
-  }
-}
-
-export async function handleLogin(formData: AuthFormData): Promise<AuthResponse> {
-  try {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: formData.email,
-        password: formData.password,
-      }),
-    });
+    console.error('MongoDB connection failed:', error);
     
-    const data: AuthResponse = await res.json();
-    
-    if (res.ok && data.token) {
-      // Save token securely
-      localStorage.setItem('auth-token', data.token);
-      // Or use cookies for better security:
-      // document.cookie = `auth-token=${data.token}; secure; httpOnly; samesite=strict`;
+    // If SSL error, try with different SSL settings
+    if (error instanceof Error && error.message.includes('SSL')) {
+      console.log('Attempting connection with alternative SSL settings...');
       
-      console.log('Login successful:', data.message);
-      return data;
-    } else {
-      console.error('Login error:', data.error);
-      return data;
+      const alternativeOptions: MongoClientOptions = {
+        tls: true,
+        tlsInsecure: true, // Only for testing - remove in production
+        serverSelectionTimeoutMS: 10000,
+        socketTimeoutMS: 45000,
+      };
+      
+      try {
+        const alternativeClient = new MongoClient(uri, alternativeOptions);
+        await alternativeClient.connect();
+        await alternativeClient.db().admin().ping();
+        console.log('Connected with alternative SSL settings');
+        return alternativeClient;
+      } catch (alternativeError) {
+        console.error('Alternative connection also failed:', alternativeError);
+        throw error; // Throw original error
+      }
     }
-  } catch (error) {
-    console.error('Network error during login:', error);
-    return { error: 'Network error. Please try again.' };
+    
+    throw error;
   }
-}
+};
 
-export function logout(): void {
-  // Remove token from storage
-  localStorage.removeItem('auth-token');
-  // If using cookies:
-  // document.cookie = 'auth-token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
-  
-  // Redirect to login or home page
-  window.location.href = '/login';
-}
-
-export function getAuthToken(): string | null {
-  return localStorage.getItem('auth-token');
-}
-
-export function isAuthenticated(): boolean {
-  const token = getAuthToken();
-  if (!token) return false;
-  
-  // Optional: Verify token hasn't expired
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const currentTime = Date.now() / 1000;
-    return payload.exp > currentTime;
-  } catch {
-    return false;
-  }
-}
+// Export the default client promise
+export default clientPromise;
