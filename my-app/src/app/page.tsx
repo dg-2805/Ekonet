@@ -8,8 +8,19 @@ import Footer from "@/components/landing-page/Footer"
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 text-foreground">
-      <div className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-20" style={{ backgroundImage: `url(/hero-wildlife-silhouettes.jpg)` }} />
-      <div className="fixed inset-0 bg-gradient-to-br from-background/60 via-background/40 to-background/60" />
+      {/* Video Background */}
+      <div className="fixed inset-0 opacity-20">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover"
+        >
+          <source src="/bg-wild.mp4" type="video/mp4" />
+        </video>
+      </div>
+      <div className="fixed inset-0 bg-gradient-to-br from-background/40 via-background/25 to-background/40" />
       <div className="hero-glow" />
       <div className="relative z-10 pt-10">
         <HeroSection />

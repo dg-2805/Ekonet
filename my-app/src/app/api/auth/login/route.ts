@@ -50,15 +50,31 @@ export async function POST(req: Request) {
       { expiresIn: '1d' }
     );
    
-    // Set token in cookie
+    // Prepare user data to return
+    const userData = {
+      id: user._id.toString(),
+      email: user.email,
+      name: user.name || user.email.split('@')[0], // Fallback to email prefix if no name
+      role: user.role || 'reporter', // Fallback to reporter if no role
+      location: user.location || '',
+      reportsCount: user.reportsCount || 0,
+      ...(user.role === 'ngo' && {
+        orgName: user.orgName,
+        description: user.description,
+        licenseExpiry: user.licenseExpiry,
+        licenseAuthority: user.licenseAuthority,
+        verified: user.verified
+      })
+    };
+    
+    // Return token in response body for client-side storage
     const response = NextResponse.json({ 
       message: 'Login successful',
-      user: {
-        id: user._id.toString(),
-        email: user.email
-      }
+      token: token, // Include token in response
+      user: userData
     });
     
+    // Also set token in cookie for server-side access
     response.cookies.set('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

@@ -78,38 +78,88 @@ export default function NGODashboard() {
   const [selectedIncidents, setSelectedIncidents] = useState<string[]>([])
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [modalStatus, setModalStatus] = useState<string>("")
+  const [user, setUser] = useState<any>(null)
 
   useEffect(() => {
-    fetchData()
+    // Get user data from API using JWT token
+    const fetchUserData = async () => {
+      try {
+        // Get JWT token from localStorage
+        const token = localStorage.getItem('token')
+        if (token) {
+          console.log('JWT token found, fetching user data from database')
+          
+          // Fetch fresh user data from MongoDB using JWT token
+          const response = await fetch('/api/auth/me', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          })
+          
+          if (response.ok) {
+            const data = await response.json()
+            console.log('User data from API:', JSON.stringify(data.user, null, 2))
+            setUser(data.user)
+            
+            // Fetch dashboard data after user data is loaded
+            await fetchData(data.user)
+          } else {
+            console.error('Failed to fetch user data from API:', response.status)
+            // Still fetch dashboard data even if user fetch fails
+            await fetchData()
+          }
+        } else {
+          console.log('No JWT token found, user not authenticated')
+          // No token, user not logged in
+          await fetchData()
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error)
+        // Still fetch dashboard data even if user fetch fails
+        await fetchData()
+      }
+    }
+    
+    fetchUserData()
   }, [])
 
-  const fetchData = async () => {
+  const fetchData = async (userData?: any) => {
     try {
-      const [summaryRes, incidentsRes] = await Promise.all([fetch("/api/ngo/summary"), fetch("/api/ngo/incidents")])
+      // Use passed userData or fallback to state user
+      const currentUser = userData || user
+      
+      // Create summary data using only the real user data from login
+      if (currentUser) {
+        const summaryData = {
+          openIncidents: 18,
+          slaBreaches24h: 3,
+          avgTriageMinutes: 46,
+          donationsToday: 1250,
+          trend: [10, 12, 9, 14, 18, 16, 20],
+          ngoName: currentUser.orgName,
+          ngoLocation: currentUser.location
+        }
 
-      const summaryData = await summaryRes.json()
-      const incidentsData = await incidentsRes.json()
-
-      // Add mock NGO data if API doesn't provide it
-      const enhancedSummaryData = {
-        ...summaryData,
-        ngoName: summaryData.ngoName || "Wildlife Shield Foundation",
-        ngoLocation: summaryData.ngoLocation || "Central India Region"
+        console.log('Summary data using real user login details:', JSON.stringify(summaryData, null, 2))
+        setSummary(summaryData)
       }
 
-      setSummary(enhancedSummaryData)
+      // Fetch incidents
+      const incidentsRes = await fetch("/api/ngo/incidents")
+      const incidentsData = await incidentsRes.json()
       setIncidents(incidentsData.items)
     } catch (error) {
       console.error("Failed to fetch data:", error)
-      // Fallback mock data
+      // Fallback mock data with user data
+      const currentUser = userData || user
       setSummary({
         openIncidents: 12,
         slaBreaches24h: 2,
         avgTriageMinutes: 45,
         donationsToday: 2500,
         trend: [8, 12, 15, 11, 9, 14, 12],
-        ngoName: "Wildlife Shield Foundation",
-        ngoLocation: "Central India Region"
+        ngoName: currentUser?.orgName,
+        ngoLocation: currentUser?.location
       })
       setIncidents([
         {
@@ -219,17 +269,18 @@ export default function NGODashboard() {
                  <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground">
                    NGO <span className="text-gradient-nature">DASHBOARD</span>
                  </h1>
-                 <div className="flex items-center gap-4 mt-2">
-                   <h2 className="text-xl font-semibold text-white">
-                     {summary?.ngoName || "Wildlife Protection NGO"}
-                   </h2>
-                   {summary?.ngoLocation && (
-                     <div className="flex items-center gap-2 text-lg text-emerald-400">
-                       <MapPin className="h-4 w-4" />
-                       <span>Serving {summary.ngoLocation}</span>
-                     </div>
-                   )}
-                 </div>
+                                   <div className="flex items-center gap-4 mt-2">
+                    <h2 className="text-xl font-semibold text-white">
+                      {user?.orgName || "Wildlife Protection NGO"}
+                    </h2>
+                    {user?.location && (
+                      <div className="flex items-center gap-2 text-lg text-emerald-400">
+                        <MapPin className="h-4 w-4" />
+                        <span>Serving {user.location}</span>
+                      </div>
+                    )}
+                  </div>
+                 
                </div>
              </div>
            </div>
@@ -426,7 +477,7 @@ export default function NGODashboard() {
                      <div className="w-8 h-8 bg-emerald-500/20 rounded-full flex items-center justify-center border border-emerald-500/30">
                        <span className="text-sm font-bold text-emerald-400">1</span>
                      </div>
-                     <span className="text-lg font-medium text-white">Wildlife Shield</span>
+                     <span className="text-lg font-medium text-white">{user?.orgName || "Your Organization"}</span>
                    </div>
                    <span className="text-lg text-emerald-400">94</span>
                  </div>

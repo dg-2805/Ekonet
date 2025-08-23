@@ -21,16 +21,32 @@ const Navbar = () => {
   useEffect(() => {
     // Check for user info in localStorage on mount
     const storedUser = localStorage.getItem('user')
+    
     if (storedUser) {
-      setUser(JSON.parse(storedUser))
+      try {
+        const userData = JSON.parse(storedUser)
+        setUser(userData)
+      } catch (error) {
+        console.error('Error parsing user data:', error)
+      }
     }
+    
     // Listen for login/signup events
-    window.addEventListener('user-auth', () => {
+    const handleUserAuth = () => {
       const updatedUser = localStorage.getItem('user')
-      if (updatedUser) setUser(JSON.parse(updatedUser))
-    })
+      if (updatedUser) {
+        try {
+          const userData = JSON.parse(updatedUser)
+          setUser(userData)
+        } catch (error) {
+          console.error('Error parsing updated user data:', error)
+        }
+      }
+    }
+    
+    window.addEventListener('user-auth', handleUserAuth)
     return () => {
-      window.removeEventListener('user-auth', () => {})
+      window.removeEventListener('user-auth', handleUserAuth)
     }
   }, [])
 
@@ -51,13 +67,13 @@ const Navbar = () => {
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-      isScrolled ? 'glass-panel backdrop-blur-xl shadow-soft' : 'bg-transparent'
+      isScrolled ? 'bg-white/10 backdrop-blur-xl border-b border-white/20 shadow-xl' : 'bg-transparent'
     }`}>
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <img src="/paw-icon.png" alt="WildWatch" className="w-10 h-10 rounded-xl" />
-            <span className="text-2xl font-serif font-bold text-gradient-nature">WildWatch</span>
+            <img src="/paw-icon.png" alt="Ekonet" className="w-10 h-10 rounded-xl" />
+            <span className="text-2xl font-serif font-bold text-gradient-nature">Ekonet</span>
           </Link>
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-muted-foreground hover:text-primary transition-colors">How it Works</a>
@@ -69,15 +85,17 @@ const Navbar = () => {
             {user ? (
               <div className="relative">
                 <button
-                  className="focus:outline-none"
+                  className="flex items-center gap-2 focus:outline-none hover:bg-white/10 rounded-lg px-3 py-2 transition-colors"
                   onClick={() => setShowDropdown((prev) => !prev)}
-                  style={{ background: "none", border: "none", padding: 0 }}
                 >
                   <img
                     src={user.avatar || "/paw-icon.png"}
                     alt="Profile"
-                    className="w-10 h-10 rounded-full border-2 border-primary shadow"
+                    className="w-8 h-8 rounded-full border-2 border-primary shadow"
                   />
+                                     <span className="text-sm font-medium text-white hidden sm:block">
+                     {user.role === 'ngo' ? user.orgName : user.name}
+                   </span>
                 </button>
                 {showDropdown && (
                   <div className="absolute right-0 mt-2 w-32 bg-white rounded shadow-lg z-50">

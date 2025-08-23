@@ -27,14 +27,14 @@ export default function HeroSection() {
             conservation efforts.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button className="nature-button-primary text-lg px-8 py-4 h-auto">
-              Report Emergency
-            </Button>
-            <Link href="/ngo">
-              <Button className="nature-button-secondary text-lg px-8 py-4 h-auto">
-                NGO Dashboard
-              </Button>
-            </Link>
+            <button className="px-12 py-4 rounded-full relative bg-white/10 backdrop-blur-xl text-white text-base font-semibold tracking-wide hover:shadow-2xl hover:shadow-emerald-500/20 transition-all duration-300 border border-white/20 group">
+              <div className="absolute inset-x-0 h-px w-1/2 mx-auto -top-px shadow-2xl bg-gradient-to-r from-transparent via-emerald-500 to-transparent" />
+              <span className="relative z-20">Report Emergency</span>
+            </button>
+            <button className="px-12 py-4 rounded-full relative bg-white/10 backdrop-blur-xl text-white text-base font-semibold tracking-wide hover:shadow-2xl hover:shadow-emerald-500/20 transition-all duration-300 border border-white/20 group">
+              <div className="absolute inset-x-0 h-px w-1/2 mx-auto -top-px shadow-2xl bg-gradient-to-r from-transparent via-emerald-500 to-transparent" />
+              <span className="relative z-20">NGO Dashboard</span>
+            </button>
           </div>
           <div className="flex flex-wrap justify-center items-center gap-8 mt-16 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">

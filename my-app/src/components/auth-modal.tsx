@@ -96,11 +96,14 @@ export default function AuthModal({ open, mode, onClose }: AuthModalProps) {
       })
       const data = await res.json()
       if (res.ok) {
-        localStorage.setItem("token", data.token)
+        // Store token from response
+        if (data.token) {
+          localStorage.setItem("token", data.token)
+        }
         if (data.user) {
           localStorage.setItem("user", JSON.stringify(data.user))
-          window.dispatchEvent(new Event("user-auth"))
         }
+        window.dispatchEvent(new Event("user-auth"))
         showMessage("Login successful!")
         onClose()
       } else {
@@ -132,10 +135,14 @@ export default function AuthModal({ open, mode, onClose }: AuthModalProps) {
       });
       const data = await res.json();
       if (res.ok) {
+        // Store token from response
+        if (data.token) {
+          localStorage.setItem("token", data.token)
+        }
         if (data.user) {
           localStorage.setItem("user", JSON.stringify(data.user));
-          window.dispatchEvent(new Event("user-auth"));
         }
+        window.dispatchEvent(new Event("user-auth"));
         showMessage("Signup successful!");
         onClose();
       } else {
@@ -174,10 +181,14 @@ export default function AuthModal({ open, mode, onClose }: AuthModalProps) {
       });
       const data = await res.json();
       if (res.ok) {
+        // Store token from response
+        if (data.token) {
+          localStorage.setItem("token", data.token)
+        }
         if (data.user) {
           localStorage.setItem("user", JSON.stringify(data.user));
-          window.dispatchEvent(new Event("user-auth"));
         }
+        window.dispatchEvent(new Event("user-auth"));
         showMessage("NGO registered!");
         onClose();
       } else {
@@ -204,7 +215,7 @@ export default function AuthModal({ open, mode, onClose }: AuthModalProps) {
               <span className="text-primary" aria-hidden>🐾</span>
             </div>
             <h2 className="text-xl font-semibold text-card-foreground">
-              {authMode === "login" ? "Welcome back" : "Join WildWatch"}
+              {authMode === "login" ? "Welcome back" : "Join Ekonet"}
             </h2>
           </div>
           <Button
