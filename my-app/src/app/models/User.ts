@@ -12,6 +12,8 @@ const UserSchema = new Schema({
   license: { type: String }, // or licenseFileUrl if uploading
 
   createdAt: { type: Date, default: Date.now },
+  }, {
+  collection: 'users'
 });
 
 export default models.User || model('User', UserSchema);
