@@ -35658,9 +35658,10 @@
         }
         
         function updateMap() {
-            createMarkers(filteredData);
-            createHeatmap(filteredData);
-        }
+      createMarkers(filteredData);
+      createHeatmap(filteredData);
+      updateClusterLegend(filteredData);
+    }
         
         // Toggle controls
         document.getElementById('clusters-toggle').addEventListener('change', function() {
@@ -35680,7 +35681,26 @@
         });
         
         // Initialize
-        updateMap();
+    updateMap();
+
+    // Function to count clusters and update legend
+    function updateClusterLegend(data) {
+      // Count clusters 0, 1, 2
+      let clusterCounts = { 0: 0, 1: 0, 2: 0 };
+      data.forEach(point => {
+        if (point.cluster === 0) clusterCounts[0]++;
+        else if (point.cluster === 1) clusterCounts[1]++;
+        else if (point.cluster === 2) clusterCounts[2]++;
+      });
+
+      // Update legend DOM
+      const legend0 = document.querySelector('.cluster-item.cluster-0 small');
+      const legend1 = document.querySelector('.cluster-item.cluster-1 small');
+      const legend2 = document.querySelector('.cluster-item.cluster-2 small');
+      if (legend0) legend0.textContent = `(${clusterCounts[0]} incidents)`;
+      if (legend1) legend1.textContent = `(${clusterCounts[1]} incidents)`;
+      if (legend2) legend2.textContent = `(${clusterCounts[2]} incidents)`;
+    }
     </script>
 </body>
 </html>
