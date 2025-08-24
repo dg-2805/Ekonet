@@ -79,6 +79,7 @@ const Navbar = () => {
             <a href="#features" className="text-muted-foreground hover:text-primary transition-colors">How it Works</a>
             <Link href="/report" className="text-muted-foreground hover:text-primary transition-colors">Report</Link>
             <Link href="/ngo" className="text-muted-foreground hover:text-primary transition-colors">For NGOs</Link>
+            <Link href="/live-detection" className="text-muted-foreground hover:text-primary transition-colors">Live Detection</Link>
             <a href="#about" className="text-muted-foreground hover:text-primary transition-colors">About</a>
           </div>
           <div className="flex items-center gap-3">

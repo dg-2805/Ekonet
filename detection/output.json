@@ -1,0 +1,25 @@
+{
+  "session_info": {
+    "start_time": 1755996740.3971195,
+    "end_time": 1755996769.4334085,
+    "total_events": 1
+  },
+  "events": [
+    {
+      "event": "final_summary",
+      "timestamp": 1755996769.43241,
+      "session_stats": {
+        "total_time_seconds": 29.04,
+        "total_frames": 270,
+        "processed_frames": 134,
+        "average_fps": 4.6,
+        "confidence_threshold": 0.5
+      },
+      "detection_results": {
+        "total_detections": 0,
+        "most_detected_animal": null,
+        "all_animals": []
+      }
+    }
+  ]
+}

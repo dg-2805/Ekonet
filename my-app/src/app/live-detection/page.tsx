@@ -42,6 +42,23 @@ const animalEmojis: { [key: string]: string } = {
 const chartColors = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#f97316", "#84cc16"]
 
 export default function LiveDetectionPage() {
+  // Poll output.json every 5 seconds
+  const [outputData, setOutputData] = useState<any>(null);
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    const fetchOutput = async () => {
+      try {
+        const res = await fetch("/api/output-json");
+        if (res.ok) {
+          const data = await res.json();
+          setOutputData(data);
+        }
+      } catch {}
+    };
+    fetchOutput();
+    interval = setInterval(fetchOutput, 5000);
+    return () => clearInterval(interval);
+  }, []);
   const [isPlaying, setIsPlaying] = useState(false)
   const [showBoundingBoxes, setShowBoundingBoxes] = useState(true)
   const [currentDetections, setCurrentDetections] = useState<Detection[]>([])
@@ -62,6 +79,8 @@ export default function LiveDetectionPage() {
 
   const startWebcam = async () => {
     try {
+      // Start Python detection script via API
+      await fetch("/api/start-webcam", { method: "POST" });
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { width: { ideal: 1280 }, height: { ideal: 720 } },
         audio: false,
@@ -200,34 +219,53 @@ export default function LiveDetectionPage() {
           <div className="space-y-6 h-full overflow-y-auto pr-1 min-w-0">
             <Card className="rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl shadow-2xl shadow-black/20">
               <CardHeader className="pb-3">
-                <CardTitle className="text-white text-lg">Status</CardTitle>
+                <CardTitle className="text-white text-lg">Detection Output</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-slate-300">Webcam:</span>
-                  <Badge className={isPlaying ? "bg-emerald-600" : "bg-slate-600"}>
-                    {isPlaying ? "On" : "Off"}
-                  </Badge>
-                </div>
+                {outputData ? (
+                  <div>
+                    <div className="mb-2">
+                      <span className="text-slate-300">Session:</span>
+                      <span className="ml-2 text-white">{new Date(outputData.session_info.start_time * 1000).toLocaleString()} - {new Date(outputData.session_info.end_time * 1000).toLocaleString()}</span>
+                    </div>
+                    <div className="mb-2">
+                      <span className="text-slate-300">Total Events:</span>
+                      <span className="ml-2 text-white">{outputData.session_info.total_events}</span>
+                    </div>
+                    {outputData.events && outputData.events.length > 0 && (
+                      <div>
+                        <div className="font-bold text-white mb-2">Summary:</div>
+                        {outputData.events.map((event: any, idx: number) => (
+                          <div key={idx} className="mb-3 p-2 rounded bg-white/5">
+                            <div className="text-emerald-400 font-semibold">{event.event}</div>
+                            {event.detection_results && (
+                              <div>
+                                <div className="text-white">Total Detections: {event.detection_results.total_detections}</div>
+                                {event.detection_results.most_detected_animal && (
+                                  <div className="text-white">Most Detected: {event.detection_results.most_detected_animal.animal} ({event.detection_results.most_detected_animal.count})</div>
+                                )}
+                                {event.detection_results.all_animals && event.detection_results.all_animals.length > 0 && (
+                                  <div className="mt-1">
+                                    <div className="text-slate-300">All Animals:</div>
+                                    <ul className="ml-4 text-white">
+                                      {event.detection_results.all_animals.map((a: any, i: number) => (
+                                        <li key={i}>{a.animal}: {a.count} ({a.percentage}%)</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-slate-300">No output.json data found. Run detection to generate results.</div>
+                )}
               </CardContent>
             </Card>
-
-            {latestDetection && (
-              <Card className="rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl shadow-2xl shadow-black/20">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-white text-lg">Latest Detection</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-white font-medium">
-                      {animalEmojis[latestDetection.animal]} {latestDetection.animal}
-                    </span>
-                    <Badge className="bg-emerald-600 text-white">{latestDetection.confidence}%</Badge>
-                  </div>
-                  <Progress value={latestDetection.confidence} className="h-2" />
-                </CardContent>
-              </Card>
-            )}
           </div>
         </div>
       </div>

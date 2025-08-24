@@ -1,0 +1,86 @@
+{
+  "species": {
+    "scientific_name": "Panthera tigris",
+    "genus": "Panthera",
+    "species_epithet": "tigris",
+    "subspecies": null,
+    "common_name": "Tiger",
+    "other_common_names": [],
+    "confidence": 95,
+    "taxonomy": {
+      "class": "Mammalia",
+      "order": "Carnivora",
+      "family": "Felidae"
+    },
+    "distinguishing_features": [
+      "Large, powerful feline body.",
+      "Distinctive orange-brown fur with prominent, irregular black vertical stripes.",
+      "White fur visible on the belly and inner legs.",
+      "Large, padded paws visible on the foreleg."
+    ],
+    "similar_candidates": []
+  },
+  "conservation": {
+    "iucn_status": "Endangered",
+    "protected_status": "CITES Appendix I"
+  },
+  "danger_profile": {
+    "is_venomous": false,
+    "is_poisonous": false,
+    "toxicity_level": null,
+    "primary_toxins": [],
+    "threat_to_humans": "Tigers are apex predators and can be extremely dangerous to humans, especially if provoked or if their habitat is encroached upon. This individual is deceased, posing no immediate threat.",
+    "evidence": "General knowledge of tiger behavior and ecology."
+  },
+  "health_indicators": {
+    "age_sex": null,
+    "visible_injuries": [],
+    "condition": "Deceased. Appears to have been in relatively good physical condition prior to death, with no visible signs of emaciation or chronic illness."
+  },
+  "habitat_context": {
+    "environment": "The animal is lying on a patterned mat, likely in a forested or natural area, suggesting human intervention in its location.",
+    "human_impact": "The presence of the mat and the deceased state of the animal strongly indicate human interaction, likely involving poaching or illegal wildlife trade."
+  },
+  "threat_analysis": {
+    "illegal_activity_detected": true,
+    "evidence": [
+      "Deceased endangered species (tiger) laid out on a mat, suggesting human handling and potential illegal killing or trafficking."
+    ],
+    "weapons_traps": [],
+    "suspicious_activity": [
+      "The entire scene is highly suspicious, indicating potential poaching or illegal wildlife trade of a protected species."
+    ]
+  },
+  "risk_assessment": {
+    "level": 4,
+    "justification": "The animal is a deceased endangered species, strongly indicating a critical incident of poaching or illegal wildlife trade has occurred.",
+    "urgency": "Critical"
+  },
+  "recommended_actions": [
+    "Initiate an immediate investigation into the cause of death and circumstances.",
+    "Identify and apprehend individuals involved in the killing or trafficking of the tiger.",
+    "Conduct forensic analysis on the carcass to gather evidence.",
+    "Increase anti-poaching patrols and enforcement efforts in the region.",
+    "Raise public awareness about wildlife protection and the severe penalties for poaching endangered species."
+  ],
+  "metadata": {
+    "analysis_type": "image",
+    "timestamp": "2025-08-23T19:51:40.545241",
+    "source": "C:\\Users\\daria\\AppData\\Local\\Temp\\tmpokwi33gp.jpeg",
+    "model": "gemini-2.5-flash",
+    "universal_detector": {
+      "detected_file_type": "image",
+      "analysis_timestamp": "2025-08-23T19:51:40.545241",
+      "file_info": {
+        "path": "C:\\Users\\daria\\AppData\\Local\\Temp\\tmpokwi33gp.jpeg",
+        "name": "tmpokwi33gp.jpeg",
+        "size_bytes": 11028,
+        "size_mb": 0.01,
+        "extension": ".jpeg",
+        "created": "2025-08-23T19:51:22.362660",
+        "modified": "2025-08-23T19:51:22.362660"
+      },
+      "version": "1.0.0"
+    }
+  }
+}
