@@ -5,7 +5,10 @@ import tempfile
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
+from typing import Optional
+import subprocess
+import sys
 from flask_cors import CORS
 
 # Add the specific path to your detect.py
@@ -270,6 +273,164 @@ def get_analysis(filename: str) -> Any:
 def list_analyses() -> Any:
     analysis_files = [f for f in os.listdir('.') if f.endswith('_analysis.json')]
     return jsonify({"analysis_files": analysis_files})
+
+# ------------------ Webcam MJPEG Stream ------------------
+try:
+    import cv2  # type: ignore
+    _cv2_ok = True
+except Exception:
+    cv2 = None  # type: ignore
+    _cv2_ok = False
+
+_webcam_cap = None  # lazy-initialized capture
+_webcam_proc: Optional[subprocess.Popen] = None  # external webcam.py process
+
+# Optional YOLO detection for MJPEG stream
+try:
+    from ultralytics import YOLO  # type: ignore
+    _ultra_ok = True
+except Exception:
+    YOLO = None  # type: ignore
+    _ultra_ok = False
+
+_yolo_model = None
+_detect_every_n = 2
+_frame_index = 0
+_det_counts: dict[str, int] = {}
+_session_start_ts: Optional[float] = None
+
+def _get_webcam_cap():
+    global _webcam_cap
+    if _webcam_cap is None and _cv2_ok:
+        _webcam_cap = cv2.VideoCapture(0)
+        # Try setting a sane resolution
+        try:
+            _webcam_cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+            _webcam_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+        except Exception:
+            pass
+    return _webcam_cap
+
+def _generate_mjpeg():
+    import time
+    global _yolo_model, _frame_index, _det_counts, _session_start_ts
+    cap = _get_webcam_cap()
+    if not _cv2_ok or cap is None or not cap.isOpened():
+        # yield a single empty frame notice
+        msg = b"--frame\r\nContent-Type: text/plain\r\n\r\nWebcam unavailable\r\n"
+        yield msg
+        return
+    if _session_start_ts is None:
+        _session_start_ts = time.time()
+        _det_counts = {}
+        _frame_index = 0
+    if _ultra_ok and _yolo_model is None:
+        try:
+            _yolo_model = YOLO('yolov8n.pt')
+        except Exception:
+            _yolo_model = None
+    while True:
+        success, frame = cap.read()
+        if not success:
+            break
+        _frame_index += 1
+        # Optionally run detection every N frames
+        if _yolo_model is not None and _frame_index % _detect_every_n == 0:
+            try:
+                results = _yolo_model(frame, verbose=False, imgsz=640)
+                for r in results:
+                    names = r.names if hasattr(r, 'names') else {}
+                    if getattr(r, 'boxes', None) is not None:
+                        for b in r.boxes:
+                            try:
+                                x1, y1, x2, y2 = map(int, b.xyxy[0].cpu().numpy())
+                                conf = float(b.conf[0].cpu().numpy())
+                                cls_id = int(b.cls[0].cpu().numpy())
+                                label = names.get(cls_id, str(cls_id))
+                                # Count label
+                                _det_counts[label] = _det_counts.get(label, 0) + 1
+                                # Draw box
+                                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                                txt = f"{label} {conf:.2f}"
+                                cv2.putText(frame, txt, (x1, max(0, y1-6)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1)
+                            except Exception:
+                                continue
+            except Exception:
+                pass
+        # Encode to JPEG
+        ret, buf = cv2.imencode('.jpg', frame)
+        if not ret:
+            continue
+        jpg = buf.tobytes()
+        yield (b"--frame\r\n"
+               b"Content-Type: image/jpeg\r\n\r\n" + jpg + b"\r\n")
+
+@app.get('/webcam/start')
+def webcam_start() -> Any:
+    cap = _get_webcam_cap()
+    ok = _cv2_ok and cap is not None and cap.isOpened()
+    return jsonify({"ok": ok})
+
+@app.get('/webcam/stream')
+def webcam_stream():
+    return Response(_generate_mjpeg(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.post('/webcam/start_script')
+def webcam_start_script() -> Any:
+    """Start external Python webcam script (agent/webcam.py) using a command string."""
+    global _webcam_proc
+    try:
+        if _webcam_proc and _webcam_proc.poll() is None:
+            return jsonify({"ok": True, "message": "webcam.py already running"})
+        # Start detection/webcam.py (not agent)
+        script_path = Path(__file__).resolve().parents[1] / 'detection' / 'webcam.py'
+        if not script_path.exists():
+            # If webcam.py not present, report gracefully
+            return jsonify({"ok": False, "error": f"webcam.py not found at {str(script_path)}"}), 404
+        # Build command string (works on Windows and Unix)
+        python_exe = sys.executable or 'python'
+        cmd = f'"{python_exe}" "{str(script_path)}"'
+        _webcam_proc = subprocess.Popen(cmd, shell=True)
+        return jsonify({"ok": True, "pid": _webcam_proc.pid})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+@app.post('/webcam/stop_script')
+def webcam_stop_script() -> Any:
+    """Stop external webcam.py if running."""
+    global _webcam_proc
+    try:
+        if _webcam_proc and _webcam_proc.poll() is None:
+            _webcam_proc.terminate()
+            _webcam_proc = None
+            return jsonify({"ok": True, "message": "stopped"})
+        return jsonify({"ok": True, "message": "not running"})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+@app.get('/webcam/summary')
+def webcam_summary() -> Any:
+    import time
+    return jsonify({
+        "session_info": {
+            "start_time": _session_start_ts or time.time(),
+            "end_time": time.time(),
+            "total_events": sum(_det_counts.values())
+        },
+        "events": [
+            {
+                "event": "periodic_status",
+                "timestamp": time.time(),
+                "detection_results": {
+                    "total_detections": sum(_det_counts.values()),
+                    "all_animals": [
+                        {"animal": k, "count": v, "percentage": (v / max(1, sum(_det_counts.values())))*100}
+                        for k, v in sorted(_det_counts.items(), key=lambda x: x[1], reverse=True)
+                    ]
+                }
+            }
+        ]
+    })
 
 if __name__ == "__main__":
     print(f"🚀 Starting Wildlife Detection API Server")

@@ -76,20 +76,16 @@ export default function LiveDetectionPage() {
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null)
+  const [mjpegUrl, setMjpegUrl] = useState<string | null>(null)
 
   const startWebcam = async () => {
     try {
-      // Start Python detection script via API
-      await fetch("/api/start-webcam", { method: "POST" });
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: false,
-      })
-      setMediaStream(stream)
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        await videoRef.current.play().catch(() => {})
-      }
+      const backend = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5002'
+      // Start external webcam.py in backend
+      await fetch(`${backend}/webcam/start_script`, { method: 'POST' }).catch(() => {})
+      // Also init camera for MJPEG fallback
+      await fetch(`${backend}/webcam/start`).catch(() => {})
+      setMjpegUrl(`${backend}/webcam/stream`)
       setIsPlaying(true)
       setSessionData((prev) => ({ ...prev, isActive: true, startTime: Date.now() }))
     } catch (err) {
@@ -105,6 +101,9 @@ export default function LiveDetectionPage() {
       if (videoRef.current) {
         videoRef.current.srcObject = null
       }
+      const backend = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5002'
+      fetch(`${backend}/webcam/stop_script`, { method: 'POST' }).catch(() => {})
+      setMjpegUrl(null)
     } finally {
       setMediaStream(null)
       setIsPlaying(false)
@@ -126,6 +125,14 @@ export default function LiveDetectionPage() {
     count,
     emoji: animalEmojis[animal] || "🐾",
   }))
+
+  // Pick a single summary event to display (prefer final_summary)
+  const summaryEvent = (() => {
+    const events = (outputData?.events as any[]) || []
+    if (!events.length) return null
+    const final = events.find((e: any) => e?.event === 'final_summary')
+    return final || events[events.length - 1]
+  })()
 
   return (
     <div className="h-screen bg-gradient-to-br from-background via-background to-muted/20 text-foreground overflow-hidden">
@@ -165,8 +172,10 @@ export default function LiveDetectionPage() {
               <CardContent className="flex-1 flex flex-col min-h-0">
                 <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-white/10 to-white/5 border border-white/10 flex-1 min-h-0">
                   {/* Video area */}
-                  {mediaStream ? (
-                    <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline />
+                  {mjpegUrl ? (
+                    <img src={mjpegUrl} alt="Webcam stream" className="absolute inset-0 w-full h-full object-cover" />
+                  ) : mediaStream ? (
+                    <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" autoPlay muted playsInline />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <div className="text-center text-slate-200">
@@ -219,46 +228,75 @@ export default function LiveDetectionPage() {
           <div className="space-y-6 h-full overflow-y-auto pr-1 min-w-0">
             <Card className="rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl shadow-2xl shadow-black/20">
               <CardHeader className="pb-3">
-                <CardTitle className="text-white text-lg">Detection Output</CardTitle>
+                <CardTitle className="text-white text-xl">Detection Output</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-4">
                 {outputData ? (
-                  <div>
-                    <div className="mb-2">
-                      <span className="text-slate-300">Session:</span>
-                      <span className="ml-2 text-white">{new Date(outputData.session_info.start_time * 1000).toLocaleString()} - {new Date(outputData.session_info.end_time * 1000).toLocaleString()}</span>
-                    </div>
-                    <div className="mb-2">
-                      <span className="text-slate-300">Total Events:</span>
-                      <span className="ml-2 text-white">{outputData.session_info.total_events}</span>
-                    </div>
-                    {outputData.events && outputData.events.length > 0 && (
-                      <div>
-                        <div className="font-bold text-white mb-2">Summary:</div>
-                        {outputData.events.map((event: any, idx: number) => (
-                          <div key={idx} className="mb-3 p-2 rounded bg-white/5">
-                            <div className="text-emerald-400 font-semibold">{event.event}</div>
-                            {event.detection_results && (
-                              <div>
-                                <div className="text-white">Total Detections: {event.detection_results.total_detections}</div>
-                                {event.detection_results.most_detected_animal && (
-                                  <div className="text-white">Most Detected: {event.detection_results.most_detected_animal.animal} ({event.detection_results.most_detected_animal.count})</div>
-                                )}
-                                {event.detection_results.all_animals && event.detection_results.all_animals.length > 0 && (
-                                  <div className="mt-1">
-                                    <div className="text-slate-300">All Animals:</div>
-                                    <ul className="ml-4 text-white">
-                                      {event.detection_results.all_animals.map((a: any, i: number) => (
-                                        <li key={i}>{a.animal}: {a.count} ({a.percentage}%)</li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                )}
-                              </div>
-                            )}
+                  <div className="space-y-6">
+                    {/* Session Summary */}
+                    <div className="rounded-xl border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 to-blue-500/10 p-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        <div>
+                          <div className="text-slate-300 text-sm mb-1">Session Start</div>
+                          <div className="text-white font-medium leading-relaxed">
+                            <div>{new Date(outputData.session_info.start_time * 1000).toLocaleDateString()}</div>
+                            <div className="text-slate-200 text-sm mt-1">{new Date(outputData.session_info.start_time * 1000).toLocaleTimeString()}</div>
                           </div>
-                        ))}
+                        </div>
+                        <div>
+                          <div className="text-slate-300 text-sm mb-1">Session End</div>
+                          <div className="text-white font-medium leading-relaxed">
+                            <div>{new Date(outputData.session_info.end_time * 1000).toLocaleDateString()}</div>
+                            <div className="text-slate-2 00 text-sm mt-1">{new Date(outputData.session_info.end_time * 1000).toLocaleTimeString()}</div>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-slate-300 text-sm mb-1">Total Events</div>
+                          <div className="text-white font-semibold text-lg">{outputData.session_info.total_events}</div>
+                        </div>
                       </div>
+                    </div>
+
+                    {/* Detection Summary (single) */}
+                    {summaryEvent?.detection_results ? (
+                      <div className="rounded-xl border border-white/20 bg-white/10 p-6 space-y-5">
+                        <div className="flex items-center justify-between">
+                          <div className="text-white font-semibold text-lg">Detection Summary</div>
+                          {summaryEvent.timestamp && (
+                            <div className="text-slate-400 text-sm ml-4">
+                              {new Date(summaryEvent.timestamp * 1000).toLocaleDateString()} • {new Date(summaryEvent.timestamp * 1000).toLocaleTimeString()}
+                            </div>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                          <div>
+                            <div className="text-slate-300 text-sm mb-1">Total Detections</div>
+                            <div className="text-white font-medium text-lg">{summaryEvent.detection_results.total_detections}</div>
+                          </div>
+                          {summaryEvent.detection_results.most_detected_animal && (
+                            <div>
+                              <div className="text-slate-300 text-sm mb-1">Most Detected</div>
+                              <div className="text-white font-medium text-lg">
+                                {summaryEvent.detection_results.most_detected_animal.animal} ({summaryEvent.detection_results.most_detected_animal.count})
+                              </div>
+                            </div>
+                          )}
+                          <div>
+                            <div className="text-slate-300 text-sm mb-2">Breakdown</div>
+                            <div className="rounded-lg border border-white/15 bg-white/5 p-3">
+                              <div className="flex flex-wrap gap-2">
+                                {(summaryEvent.detection_results.all_animals || []).slice(0, 8).map((a: any, i: number) => (
+                                  <span key={i} className="px-2.5 py-1.5 rounded-full bg-white/10 border border-white/20 text-white text-sm">
+                                    {a.animal}: {a.count} ({a.percentage}%)
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-slate-300">No detection summary available.</div>
                     )}
                   </div>
                 ) : (
