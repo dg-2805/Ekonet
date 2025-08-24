@@ -141,18 +141,18 @@ export default function LiveDetectionPage() {
       <div className="fixed inset-0 bg-gradient-to-br from-background/60 via-background/40 to-background/60" />
       <div className="hero-glow" />
 
-      <div className="max-w-[1400px] w-full mx-auto px-4 pt-28 pb-6 relative z-10 h-full flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="mb-4">
+             <div className="max-w-[1400px] w-full mx-auto px-4 pt-20 pb-6 relative z-10 h-screen flex flex-col">
+                 {/* Header */}
+         <div className="mb-2">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-1">Live Wildlife Detection</h1>
           <p className="text-slate-300">Open your webcam to preview a live feed</p>
         </div>
 
-        {/* Main Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 overflow-hidden">
-          {/* Left Panel - Video Feed */}
-          <div className="lg:col-span-2 overflow-hidden min-w-0">
-            <Card className="h-full rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl shadow-2xl shadow-black/20 flex flex-col min-w-0">
+                 {/* Main Layout */}
+         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 overflow-hidden">
+           {/* Left Panel - Video Feed */}
+           <div className="lg:col-span-2 overflow-hidden min-w-0 flex flex-col">
+             <Card className="flex-1 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl shadow-2xl shadow-black/20 flex flex-col min-w-0">
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-white">Live Feed</CardTitle>
@@ -210,32 +210,32 @@ export default function LiveDetectionPage() {
                   </AnimatePresence>
                 </div>
 
-                {/* Controls */}
-                <div className="flex items-center justify-center gap-4 mt-4">
-                  <Button
-                    onClick={isPlaying ? stopWebcam : startWebcam}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                  >
-                    {isPlaying ? <Square className="w-4 h-4 mr-2" /> : <Play className="w-4 h-4 mr-2" />}
-                    {isPlaying ? "Stop Webcam" : "Start Webcam"}
-                  </Button>
-                </div>
+                                 {/* Controls */}
+                 <div className="flex items-center justify-center gap-6 mt-6">
+                   <Button
+                     onClick={isPlaying ? stopWebcam : startWebcam}
+                     className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 text-base font-medium"
+                   >
+                     {isPlaying ? <Square className="w-5 h-5 mr-3" /> : <Play className="w-5 h-5 mr-3" />}
+                     {isPlaying ? "Stop Webcam" : "Start Webcam"}
+                   </Button>
+                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Right Panel - Analytics (placeholder, scrollable) */}
-          <div className="space-y-6 h-full overflow-y-auto pr-1 min-w-0">
-            <Card className="rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl shadow-2xl shadow-black/20">
+                     {/* Right Panel - Analytics (placeholder, scrollable) */}
+           <div className="flex flex-col min-w-0">
+             <Card className="flex-1 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl shadow-2xl shadow-black/20 flex flex-col">
               <CardHeader className="pb-3">
                 <CardTitle className="text-white text-xl">Detection Output</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+                             <CardContent className="flex-1 overflow-y-auto space-y-4 px-4">
                 {outputData ? (
                   <div className="space-y-6">
-                    {/* Session Summary */}
-                    <div className="rounded-xl border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 to-blue-500/10 p-6">
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                                         {/* Session Summary */}
+                     <div className="rounded-xl border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 to-blue-500/10 p-6">
+                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
                         <div>
                           <div className="text-slate-300 text-sm mb-1">Session Start</div>
                           <div className="text-white font-medium leading-relaxed">
@@ -257,42 +257,43 @@ export default function LiveDetectionPage() {
                       </div>
                     </div>
 
-                    {/* Detection Summary (single) */}
-                    {summaryEvent?.detection_results ? (
-                      <div className="rounded-xl border border-white/20 bg-white/10 p-6 space-y-5">
-                        <div className="flex items-center justify-between">
-                          <div className="text-white font-semibold text-lg">Detection Summary</div>
+                                         {/* Detection Summary (single) */}
+                     {summaryEvent?.detection_results ? (
+                       <div className="rounded-xl border border-white/20 bg-white/10 p-6 space-y-6">
+                        <div className="flex items-center justify-between min-w-0">
+                          <div className="text-white font-semibold text-lg truncate">Detection Summary</div>
                           {summaryEvent.timestamp && (
-                            <div className="text-slate-400 text-sm ml-4">
+                            <div className="text-slate-400 text-xs ml-2 flex-shrink-0">
                               {new Date(summaryEvent.timestamp * 1000).toLocaleDateString()} • {new Date(summaryEvent.timestamp * 1000).toLocaleTimeString()}
                             </div>
                           )}
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                          <div>
+                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="min-w-0">
                             <div className="text-slate-300 text-sm mb-1">Total Detections</div>
-                            <div className="text-white font-medium text-lg">{summaryEvent.detection_results.total_detections}</div>
+                            <div className="text-white font-medium text-lg truncate">{summaryEvent.detection_results.total_detections}</div>
                           </div>
                           {summaryEvent.detection_results.most_detected_animal && (
-                            <div>
+                            <div className="min-w-0">
                               <div className="text-slate-300 text-sm mb-1">Most Detected</div>
-                              <div className="text-white font-medium text-lg">
+                              <div className="text-white font-medium text-lg truncate">
                                 {summaryEvent.detection_results.most_detected_animal.animal} ({summaryEvent.detection_results.most_detected_animal.count})
                               </div>
                             </div>
                           )}
-                          <div>
-                            <div className="text-slate-300 text-sm mb-2">Breakdown</div>
-                            <div className="rounded-lg border border-white/15 bg-white/5 p-3">
-                              <div className="flex flex-wrap gap-2">
-                                {(summaryEvent.detection_results.all_animals || []).slice(0, 8).map((a: any, i: number) => (
-                                  <span key={i} className="px-2.5 py-1.5 rounded-full bg-white/10 border border-white/20 text-white text-sm">
-                                    {a.animal}: {a.count} ({a.percentage}%)
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
+                                                     <div className="sm:col-span-2 min-w-0">
+                             <div className="text-slate-300 text-sm mb-2">Top Detections</div>
+                             <div className="rounded-lg border border-white/15 bg-white/5 p-3">
+                               <div className="space-y-2">
+                                 {(summaryEvent.detection_results.all_animals || []).slice(0, 3).map((a: any, i: number) => (
+                                   <div key={i} className="flex items-center justify-between">
+                                     <span className="text-white text-sm font-medium truncate">{a.animal}</span>
+                                     <span className="text-emerald-400 text-sm font-semibold ml-2">{a.count}</span>
+                                   </div>
+                                 ))}
+                               </div>
+                             </div>
+                           </div>
                         </div>
                       </div>
                     ) : (

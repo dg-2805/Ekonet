@@ -16,6 +16,9 @@ export default function Home() {
           muted
           playsInline
           className="w-full h-full object-cover"
+          onLoadedMetadata={(e) => {
+            e.currentTarget.playbackRate = 0.5; // Play at half speed
+          }}
         >
           <source src="/bg-wild.mp4" type="video/mp4" />
         </video>

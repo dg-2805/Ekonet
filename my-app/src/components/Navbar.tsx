@@ -70,11 +70,14 @@ const Navbar = () => {
   const renderRoleLink = () => {
     if (user?.role === 'reporter') {
       return (
-        <Link href="/dashboard" className="text-muted-foreground hover:text-primary transition-colors">Dashboard</Link>
+        <>
+          <Link href="/report" className="text-muted-foreground hover:text-primary transition-colors text-base">Report</Link>
+          <Link href="/dashboard" className="text-muted-foreground hover:text-primary transition-colors text-base">Dashboard</Link>
+        </>
       )
     }
     return (
-      <Link href="/ngo" className="text-muted-foreground hover:text-primary transition-colors">For NGOs</Link>
+      <Link href="/ngo" className="text-muted-foreground hover:text-primary transition-colors text-base">For NGOs</Link>
     )
   }
 
@@ -85,14 +88,14 @@ const Navbar = () => {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <img src="/paw-icon.png" alt="Ekonet" className="w-10 h-10 rounded-xl" />
-            <span className="text-2xl font-serif font-bold text-gradient-nature">Ekonet</span>
+            <img src="/paw-icon.png" alt="eकोnet" className="w-10 h-10 rounded-xl" />
+            <span className="text-2xl font-serif font-bold text-gradient-nature">eकोnet</span>
           </Link>
           <div className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-muted-foreground hover:text-primary transition-colors">How it Works</a>
+            <a href="#features" className="text-muted-foreground hover:text-primary transition-colors text-base">How it Works</a>
             {renderRoleLink()}
-            <Link href="/live-detection" className="text-muted-foreground hover:text-primary transition-colors">Live Detection</Link>
-            <a href="#about" className="text-muted-foreground hover:text-primary transition-colors">About</a>
+            <Link href="/live-detection" className="text-muted-foreground hover:text-primary transition-colors text-base">Live Detection</Link>
+            <a href="#about" className="text-muted-foreground hover:text-primary transition-colors text-base">About</a>
           </div>
           <div className="flex items-center gap-3">
             {user ? (
@@ -124,7 +127,7 @@ const Navbar = () => {
                 )}
               </div>
             ) : (
-              <Button className="nature-button-primary px-6 py-2" onClick={() => setAuthOpen(true)}>Sign In</Button>
+              <Button className="nature-button-primary px-6 py-2 text-base font-medium" onClick={() => setAuthOpen(true)}>Sign In</Button>
             )}
           </div>
         </div>

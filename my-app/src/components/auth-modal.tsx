@@ -235,7 +235,7 @@ export default function AuthModal({ open, mode, onClose }: AuthModalProps) {
               <span className="text-primary" aria-hidden>🐾</span>
             </div>
             <h2 className="text-xl font-semibold text-card-foreground">
-              {authMode === "login" ? "Welcome back" : "Join Ekonet"}
+              {authMode === "login" ? "Welcome back" : "Join eकोnet"}
             </h2>
           </div>
           <Button

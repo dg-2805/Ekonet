@@ -14,6 +14,7 @@ import { Trash2, Upload, Check, Camera, Video, Mic, Shield, AlertTriangle, MapPi
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import MapPicker from "@/components/component/MapPicker"
+import AuthModal from "@/components/auth-modal"
 
 interface UploadedFile {
   id: string
@@ -46,6 +47,7 @@ const ThreatReporting = () => {
   const [showMapPicker, setShowMapPicker] = useState(false)
   const [isMapPickerOpen, setIsMapPickerOpen] = useState(false)
   const [pendingMapCoords, setPendingMapCoords] = useState<{ lat: number | null; lng: number | null }>({ lat: null, lng: null })
+  const [showAuthModal, setShowAuthModal] = useState(false)
   const commitMapSelection = () => {
     if (pendingMapCoords.lat !== null && pendingMapCoords.lng !== null) {
       const lat = pendingMapCoords.lat
@@ -203,6 +205,22 @@ const ThreatReporting = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+         // Check if user needs to login (not anonymous and not logged in)
+     if (!formData.isAnonymous) {
+       try {
+         const storedUser = typeof window !== 'undefined' ? localStorage.getItem('user') : null
+         if (!storedUser) {
+           // Open auth modal instead of redirecting
+           setShowAuthModal(true)
+           return
+         }
+       } catch {
+         // If there's an error reading localStorage, open auth modal
+         setShowAuthModal(true)
+         return
+       }
+     }
     
     setIsSubmitting(true)
     
@@ -466,9 +484,9 @@ const ThreatReporting = () => {
                         <div className="flex-1 p-8 bg-gradient-to-br from-slate-900/50 to-slate-800/50">
                           <div className="h-full rounded-xl overflow-hidden border border-white/20 shadow-2xl bg-white/5 backdrop-blur-sm relative">
                             <div className="h-full w-full" style={{ touchAction: 'none' }}>
-                              <MapPicker
-                                latitude={pendingMapCoords.lat ?? formData.coordinates.latitude}
-                                longitude={pendingMapCoords.lng ?? formData.coordinates.longitude}
+                                                           <MapPicker
+                                latitude={(pendingMapCoords.lat ?? formData.coordinates.latitude ?? 20) || 20}
+                                longitude={(pendingMapCoords.lng ?? formData.coordinates.longitude ?? 0) || 0}
                                 onLocationSelect={handleMapLocationSelect}
                                 className="w-full h-full"
                               />
@@ -606,13 +624,20 @@ const ThreatReporting = () => {
                   "Submit Threat Report"
                 )}
               </Button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  )
-}
+                         </div>
+           </form>
+         </div>
+       </div>
+       
+       {/* Auth Modal */}
+       <AuthModal 
+         open={showAuthModal} 
+         mode="login" 
+         onClose={() => setShowAuthModal(false)} 
+       />
+     </div>
+   )
+ }
 
 const UnifiedUploadSection = ({
   files,
