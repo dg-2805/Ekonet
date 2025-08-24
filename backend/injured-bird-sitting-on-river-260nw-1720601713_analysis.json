@@ -1,0 +1,107 @@
+{
+  "species": {
+    "scientific_name": "Columba livia domestica",
+    "genus": "Columba",
+    "species_epithet": "livia",
+    "subspecies": "domestica",
+    "common_name": "Feral Pigeon",
+    "other_common_names": [
+      "City Pigeon",
+      "Street Pigeon"
+    ],
+    "confidence": 90,
+    "taxonomy": {
+      "class": "Aves",
+      "order": "Columbiformes",
+      "family": "Columbidae"
+    },
+    "distinguishing_features": [
+      "Dark greyish-brown plumage with some white patches on wings",
+      "Typical pigeon body shape and head",
+      "Pinkish-grey beak",
+      "Appears to be a juvenile due to less defined adult plumage",
+      "Found on ground in a disturbed area, common habitat for feral pigeons"
+    ],
+    "similar_candidates": [
+      {
+        "scientific_name": "Streptopelia decaocto",
+        "common_name": "Eurasian Collared Dove",
+        "confidence": 5,
+        "why_not": "Smaller, paler plumage, and distinct black collar are absent in the image."
+      },
+      {
+        "scientific_name": "Columba palumbus",
+        "common_name": "Common Wood Pigeon",
+        "confidence": 5,
+        "why_not": "Larger size, distinct white neck patch (in adults), and prominent white wing bar are not visible."
+      }
+    ]
+  },
+  "conservation": {
+    "iucn_status": "Least Concern",
+    "protected_status": "Not protected (often considered an introduced/feral species)"
+  },
+  "danger_profile": {
+    "is_venomous": false,
+    "is_poisonous": false,
+    "toxicity_level": "low",
+    "primary_toxins": [],
+    "threat_to_humans": "Minimal; potential for disease transmission through droppings, but low direct threat.",
+    "evidence": "Feral Pigeons are not known to be venomous or poisonous. Their primary interaction with humans is through urban coexistence."
+  },
+  "health_indicators": {
+    "age_sex": "Juvenile, sex unknown",
+    "visible_injuries": [
+      "Wings splayed unnaturally",
+      "Disheveled feathers",
+      "Appears unable to fly or move properly",
+      "Context states 'injured'"
+    ],
+    "condition": "Poor, injured, and distressed, likely unable to fly."
+  },
+  "habitat_context": {
+    "environment": "Sandy/muddy ground with dry vegetation, suggesting a disturbed area, possibly urban fringe or riverbank.",
+    "human_impact": "The context mentions 'Habitat Loss' as a threat type, implying human alteration or degradation of the environment leading to the incident."
+  },
+  "threat_analysis": {
+    "illegal_activity_detected": false,
+    "evidence": [],
+    "weapons_traps": [],
+    "suspicious_activity": []
+  },
+  "risk_assessment": {
+    "ai-score": "8",
+    "ai-report": "A juvenile Feral Pigeon is injured after falling from a tree, potentially linked to habitat loss. Urgent medical intervention is required for the bird's welfare.",
+    "urgency": "High",
+    "evidence_count": 1
+  },
+  "incident": {
+    "Anti poaching": "false",
+    "Human wildlife conflict": "false",
+    "Medical care": "true",
+    "Habitat restoration": "true",
+    "Species recovery": "false"
+  },
+  "Location": "22.564300, 88.369300",
+  "reporter_name": "Debjani Gupto",
+  "metadata": {
+    "analysis_type": "image",
+    "timestamp": "2025-08-24T15:03:48.233507",
+    "source": "C:\\Users\\Sayan\\AppData\\Local\\Temp\\tmp014qyg3k.webp",
+    "model": "gemini-2.5-flash",
+    "universal_detector": {
+      "detected_file_type": "image",
+      "analysis_timestamp": "2025-08-24T15:03:48.233507",
+      "file_info": {
+        "path": "C:\\Users\\Sayan\\AppData\\Local\\Temp\\tmp014qyg3k.webp",
+        "name": "tmp014qyg3k.webp",
+        "size_bytes": 53602,
+        "size_mb": 0.05,
+        "extension": ".webp",
+        "created": "2025-08-24T15:03:30.741745",
+        "modified": "2025-08-24T15:03:30.741745"
+      },
+      "version": "1.0.0"
+    }
+  }
+}

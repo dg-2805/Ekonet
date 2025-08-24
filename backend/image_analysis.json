@@ -1,0 +1,101 @@
+{
+  "species": {
+    "scientific_name": "Elephas maximus maximus",
+    "genus": "Elephas",
+    "species_epithet": "maximus",
+    "subspecies": "maximus",
+    "common_name": "Sri Lankan Elephant",
+    "other_common_names": [
+      "Asian Elephant"
+    ],
+    "confidence": 95,
+    "taxonomy": {
+      "class": "Mammalia",
+      "order": "Proboscidea",
+      "family": "Elephantidae"
+    },
+    "distinguishing_features": [
+      "Large body size with grey, wrinkled skin",
+      "Relatively small ears compared to African elephants",
+      "Prominent forehead with a double-domed head",
+      "Presence of visible tusks, indicating a male",
+      "Typical morphology of an Asian elephant"
+    ],
+    "similar_candidates": [
+      {
+        "scientific_name": "Loxodonta africana",
+        "common_name": "African Bush Elephant",
+        "confidence": 5,
+        "why_not": "Significantly larger ears, different head shape, and typically larger tusks than observed."
+      },
+      {
+        "scientific_name": "Loxodonta cyclotis",
+        "common_name": "African Forest Elephant",
+        "confidence": 5,
+        "why_not": "Smaller body size, rounder ears, and straighter, downward-pointing tusks compared to the elephant in the image."
+      }
+    ]
+  },
+  "conservation": {
+    "iucn_status": "Endangered",
+    "protected_status": "CITES Appendix I"
+  },
+  "danger_profile": {
+    "is_venomous": false,
+    "is_poisonous": false,
+    "toxicity_level": null,
+    "primary_toxins": [],
+    "threat_to_humans": "High, due to its large size and potential for aggressive behavior if provoked or threatened, leading to severe injury or fatality.",
+    "evidence": "An adult male elephant is present on a road adjacent to human dwellings, a common scenario for human-wildlife conflict."
+  },
+  "health_indicators": {
+    "age_sex": "Adult male",
+    "visible_injuries": [],
+    "condition": "Appears to be in good physical condition, robust and healthy."
+  },
+  "habitat_context": {
+    "environment": "Anthropogenic landscape (road, human settlement) bordering natural forest/hillside habitat.",
+    "human_impact": "Direct human presence and infrastructure (road, fences, buildings) encroaching on elephant habitat, leading to potential conflict."
+  },
+  "threat_analysis": {
+    "illegal_activity_detected": false,
+    "evidence": [],
+    "weapons_traps": [],
+    "suspicious_activity": []
+  },
+  "risk_assessment": {
+    "ai-score": "8",
+    "ai-report": "An adult male elephant is on a road near human habitation, posing a significant risk of human-wildlife conflict. Urgent intervention is needed to manage the situation and prevent potential harm to both the elephant and local residents.",
+    "urgency": "High",
+    "evidence_count": 1
+  },
+  "incident": {
+    "Anti poaching": "false",
+    "Human wildlife conflict": "true",
+    "Medical care": "false",
+    "Habitat restoration": "false",
+    "Species recovery": "false"
+  },
+  "Location": "Sri Lanka",
+  "reporter_name": "anonymous",
+  "metadata": {
+    "analysis_type": "image",
+    "timestamp": "2025-08-24T13:52:52.301534",
+    "source": "C:\\Users\\Sayan\\AppData\\Local\\Temp\\tmp_c7395pz.webp",
+    "model": "gemini-2.5-flash",
+    "universal_detector": {
+      "detected_file_type": "image",
+      "analysis_timestamp": "2025-08-24T13:52:52.301534",
+      "file_info": {
+        "path": "C:\\Users\\Sayan\\AppData\\Local\\Temp\\tmp_c7395pz.webp",
+        "name": "tmp_c7395pz.webp",
+        "size_bytes": 10558,
+        "size_mb": 0.01,
+        "extension": ".webp",
+        "created": "2025-08-24T13:52:37.120144",
+        "modified": "2025-08-24T13:52:37.120144"
+      },
+      "version": "1.0.0"
+    }
+  }
+}

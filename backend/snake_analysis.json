@@ -1,44 +1,44 @@
 {
   "species": {
-    "scientific_name": "Naja kaouthia",
+    "scientific_name": "Naja naja",
     "genus": "Naja",
-    "species_epithet": "kaouthia",
+    "species_epithet": "naja",
     "subspecies": null,
-    "common_name": "Monocled Cobra",
+    "common_name": "Spectacled Cobra",
     "other_common_names": [
-      "Monocellate Cobra"
+      "Indian Cobra",
+      "Binocellate Cobra"
     ],
-    "confidence": 90,
+    "confidence": 95,
     "taxonomy": {
       "class": "Reptilia",
       "order": "Squamata",
       "family": "Elapidae"
     },
     "distinguishing_features": [
-      "Flared hood characteristic of cobras",
-      "Dark body coloration with lighter bands",
-      "Lighter ventral scales visible on the underside of the hood",
-      "Distinct head shape typical of Naja species",
-      "Presence of a single, somewhat indistinct ocellus (monocle) pattern on the hood"
+      "Prominently displayed hood",
+      "Distinct 'spectacle' or 'binocle' pattern on the dorsal side of the hood",
+      "Dark body coloration with lighter ventral scales/bands",
+      "Typical cobra head shape"
     ],
     "similar_candidates": [
       {
-        "scientific_name": "Naja naja",
-        "common_name": "Spectacled Cobra",
+        "scientific_name": "Naja kaouthia",
+        "common_name": "Monocled Cobra",
         "confidence": 70,
-        "why_not": "Typically exhibits a clearer 'spectacle' pattern (two ocelli connected by a bar) on the hood, which is not distinctly visible here."
+        "why_not": "Typically exhibits a single ocellus (monocle) pattern on the hood, not the double spectacle mark seen here."
       },
       {
         "scientific_name": "Ophiophagus hannah",
         "common_name": "King Cobra",
         "confidence": 60,
-        "why_not": "Generally larger, has a different head profile, and typically lacks a distinct hood pattern like a monocle or spectacle, though can have chevron markings."
+        "why_not": "Generally much larger, has a different head and scale morphology, and typically lacks the distinct spectacle pattern on the hood."
       }
     ]
   },
   "conservation": {
-    "iucn_status": "Vulnerable",
-    "protected_status": "CITES Appendix II, Wildlife Protection Act, 1972, Schedule II (India)"
+    "iucn_status": "Least Concern",
+    "protected_status": "Protected under Schedule II of the Wildlife Protection Act, 1972 (India)"
   },
   "danger_profile": {
     "is_venomous": true,
@@ -46,62 +46,58 @@
     "toxicity_level": "high",
     "primary_toxins": [
       "neurotoxic",
-      "cytotoxic",
-      "cardiotoxic"
+      "cardiotoxic",
+      "cytotoxic"
     ],
-    "threat_to_humans": "Highly dangerous, capable of delivering a potent venomous bite that can cause severe envenomation, leading to paralysis, tissue damage, and death if untreated.",
-    "evidence": "Known highly venomous species, image shows an alert cobra in a defensive posture."
+    "threat_to_humans": "Highly dangerous; a bite can be fatal without immediate medical intervention.",
+    "evidence": "Species is known to be highly venomous; visible hood display indicates defensive posture. Context states 'snake in house'."
   },
   "health_indicators": {
-    "age_sex": "Adult, sex not discernible",
+    "age_sex": null,
     "visible_injuries": [],
-    "condition": "Appears alert and healthy based on the visual evidence in the image."
+    "condition": "Appears healthy and alert"
   },
   "habitat_context": {
-    "environment": "Dry, open ground with sparse vegetation, possibly near human habitation or agricultural land.",
-    "human_impact": null
+    "environment": "Terrestrial, likely disturbed or semi-urban area (dirt ground with sparse vegetation).",
+    "human_impact": "Direct human-wildlife interaction due to the snake being found 'in house', indicating habitat encroachment or displacement."
   },
   "threat_analysis": {
-    "illegal_activity_detected": true,
-    "evidence": [
-      "Threat description 'maar ho gaya' (it was killed/died) indicates the snake was likely killed, which is illegal for a protected species."
-    ],
+    "illegal_activity_detected": false,
+    "evidence": [],
     "weapons_traps": [],
-    "suspicious_activity": [
-      "Killing of a protected and vulnerable snake species."
-    ]
+    "suspicious_activity": []
   },
   "risk_assessment": {
-    "ai-score": "9",
-    "ai-report": "A vulnerable Monocled Cobra has reportedly been killed due to habitat loss, indicating severe human-wildlife conflict and potential illegal activity requiring urgent intervention.",
-    "urgency": "Critical",
+    "ai-score": "8",
+    "ai-report": "A highly venomous Spectacled Cobra found inside a house poses an immediate and severe threat to human safety. This incident highlights critical human-wildlife conflict driven by habitat loss.",
+    "urgency": "Emergency",
     "evidence_count": 1
   },
   "incident": {
-    "Anti poaching": true,
-    "Human wildlife conflict": true,
-    "Medical care": false,
-    "Habitat restoration": true,
-    "Species recovery": true
+    "Anti poaching": "false",
+    "Human wildlife conflict": "true",
+    "Medical care": "false",
+    "Habitat restoration": "false",
+    "Species recovery": "false"
   },
-  "Location": "22.841277, 86.167642",
+  "Location": "22.564300, 88.369300",
   "reporter_name": "Debjani Gupto",
   "metadata": {
     "analysis_type": "image",
-    "timestamp": "2025-08-24T11:24:36.200263",
-    "source": "C:\\Users\\Sayan\\AppData\\Local\\Temp\\tmpri7w45_3.jpeg",
+    "timestamp": "2025-08-24T14:21:49.810670",
+    "source": "C:\\Users\\Sayan\\AppData\\Local\\Temp\\tmp07c0cj_u.jpeg",
     "model": "gemini-2.5-flash",
     "universal_detector": {
       "detected_file_type": "image",
-      "analysis_timestamp": "2025-08-24T11:24:36.200263",
+      "analysis_timestamp": "2025-08-24T14:21:49.810670",
       "file_info": {
-        "path": "C:\\Users\\Sayan\\AppData\\Local\\Temp\\tmpri7w45_3.jpeg",
-        "name": "tmpri7w45_3.jpeg",
+        "path": "C:\\Users\\Sayan\\AppData\\Local\\Temp\\tmp07c0cj_u.jpeg",
+        "name": "tmp07c0cj_u.jpeg",
         "size_bytes": 15444,
         "size_mb": 0.01,
         "extension": ".jpeg",
-        "created": "2025-08-24T11:24:19.739829",
-        "modified": "2025-08-24T11:24:19.740828"
+        "created": "2025-08-24T14:21:34.164132",
+        "modified": "2025-08-24T14:21:34.165135"
       },
       "version": "1.0.0"
     }

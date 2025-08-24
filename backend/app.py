@@ -300,6 +300,74 @@ _frame_index = 0
 _det_counts: dict[str, int] = {}
 _session_start_ts: Optional[float] = None
 
+def _reset_session_stats() -> None:
+    """Reset detection session counters/timers."""
+    global _frame_index, _det_counts, _session_start_ts
+    _frame_index = 0
+    _det_counts = {}
+    _session_start_ts = None
+
+def _write_output_json() -> dict:
+    """Write a final summary to detection/output.json compatible with frontend."""
+    import time
+    # Build final summary structure similar to detection/webcam.py
+    start_ts = _session_start_ts or time.time()
+    end_ts = time.time()
+    total_detections = sum(_det_counts.values())
+    if _det_counts:
+        most_detected = max(_det_counts.items(), key=lambda x: x[1])
+        all_detections = []
+        for animal, count in sorted(_det_counts.items(), key=lambda x: x[1], reverse=True):
+            pct = round((count / max(1, total_detections)) * 100, 1)
+            all_detections.append({"animal": animal, "count": count, "percentage": pct})
+        detection_results = {
+            "total_detections": total_detections,
+            "most_detected_animal": {
+                "animal": most_detected[0],
+                "count": most_detected[1],
+                "percentage": round((most_detected[1] / max(1, total_detections)) * 100, 1),
+            },
+            "all_animals": all_detections,
+        }
+    else:
+        detection_results = {
+            "total_detections": 0,
+            "most_detected_animal": None,
+            "all_animals": [],
+        }
+
+    data = {
+        "session_info": {
+            "start_time": start_ts,
+            "end_time": end_ts,
+            "total_events": total_detections,
+        },
+        "events": [
+            {
+                "event": "final_summary",
+                "timestamp": end_ts,
+                "session_stats": {
+                    "total_time_seconds": round(end_ts - start_ts, 2),
+                    "total_frames": _frame_index,
+                    "processed_frames": _frame_index,  # approximate
+                    "average_fps": 0,
+                    "confidence_threshold": None,
+                },
+                "detection_results": detection_results,
+            }
+        ],
+    }
+
+    # Write to repo detection/output.json
+    out_path = Path(__file__).resolve().parents[1] / 'detection' / 'output.json'
+    try:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(out_path, 'w') as f:
+            json.dump(data, f, indent=2)
+    except Exception as e:
+        print(f"⚠️ Failed to write {out_path}: {e}")
+    return data
+
 def _get_webcam_cap():
     global _webcam_cap, _ip_camera_url
     if _webcam_cap is None and _cv2_ok:
@@ -399,6 +467,8 @@ def webcam_start() -> Any:
     else:
         # No source provided, switch back to local webcam
         _clear_ip_camera_url()
+    # Reset session stats on each start
+    _reset_session_stats()
     
     cap = _get_webcam_cap()
     ok = _cv2_ok and cap is not None and cap.isOpened()
@@ -407,6 +477,22 @@ def webcam_start() -> Any:
 @app.get('/webcam/stream')
 def webcam_stream():
     return Response(_generate_mjpeg(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.post('/webcam/stop')
+def webcam_stop() -> Any:
+    """Stop current capture, write output.json, and reset session."""
+    try:
+        cap = _get_webcam_cap()
+        if cap is not None and cap.isOpened():
+            cap.release()
+        # Write summary JSON
+        data = _write_output_json()
+        # Reset state to allow future starts
+        _reset_webcam_cap()
+        _reset_session_stats()
+        return jsonify({"ok": True, "output": data})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
 
 @app.post('/webcam/start_script')
 def webcam_start_script() -> Any:

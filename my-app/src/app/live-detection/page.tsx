@@ -1,5 +1,4 @@
 "use client"
-
 import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -86,15 +85,13 @@ export default function LiveDetectionPage() {
       const backend = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5002'
       if (sourceType === 'ip') {
         const url = buildIpMjpegUrl(ipBaseUrl)
-        // Use backend's processed stream with YOLO detection
-        await fetch(`${backend}/webcam/start_script?source=${encodeURIComponent(url)}`, { method: 'POST' }).catch(() => {})
+        // Start backend MJPEG stream using IP camera
         await fetch(`${backend}/webcam/start?source=${encodeURIComponent(url)}`).catch(() => {})
         setMjpegUrl(`${backend}/webcam/stream`)
         setIsPlaying(true)
         setSessionData((prev) => ({ ...prev, isActive: true, startTime: Date.now() }))
       } else {
         // Laptop webcam via backend
-        await fetch(`${backend}/webcam/start_script`, { method: 'POST' }).catch(() => {})
         await fetch(`${backend}/webcam/start`).catch(() => {})
         setMjpegUrl(`${backend}/webcam/stream`)
         setIsPlaying(true)
@@ -114,7 +111,8 @@ export default function LiveDetectionPage() {
         videoRef.current.srcObject = null
       }
       const backend = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5002'
-      fetch(`${backend}/webcam/stop_script`, { method: 'POST' }).catch(() => {})
+      // Ask backend to stop and write detection/output.json
+      fetch(`${backend}/webcam/stop`, { method: 'POST' }).catch(() => {})
       setMjpegUrl(null)
     } finally {
       setMediaStream(null)

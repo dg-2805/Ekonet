@@ -17,7 +17,7 @@ from datetime import datetime
 
 # Import our analyzer classes
 from img import ImageAnalyzer
-from video import VideoAnalyzer
+from video2 import VideoAnalyzer
 from sound import AudioAnalyzer
 
 class UniversalDetector:

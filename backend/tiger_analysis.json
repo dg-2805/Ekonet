@@ -1,11 +1,13 @@
 {
   "species": {
-    "scientific_name": "Panthera tigris",
+    "scientific_name": "Panthera tigris tigris",
     "genus": "Panthera",
     "species_epithet": "tigris",
-    "subspecies": null,
-    "common_name": "Tiger",
-    "other_common_names": [],
+    "subspecies": "tigris",
+    "common_name": "Bengal Tiger",
+    "other_common_names": [
+      "Indian Tiger"
+    ],
     "confidence": 98,
     "taxonomy": {
       "class": "Mammalia",
@@ -13,97 +15,88 @@
       "family": "Felidae"
     },
     "distinguishing_features": [
-      "Distinctive orange fur with black vertical stripes",
-      "White fur on the belly, chest, and inner limbs",
-      "Large, muscular build typical of a big cat",
-      "Characteristic facial markings with white around the muzzle and eyes",
-      "Rounded ears with white spots on the back (ocelli)"
+      "Distinctive orange fur with prominent black stripes covering the body",
+      "White fur on the belly, inner limbs, and around the eyes and muzzle",
+      "Large, muscular build characteristic of a tiger",
+      "Characteristic facial markings with white patches above the eyes and black stripes on the forehead",
+      "Round ears with white spots on the back (visible)"
     ],
     "similar_candidates": [
       {
-        "scientific_name": "Panthera leo",
-        "common_name": "Lion",
-        "confidence": 5,
-        "why_not": "Lions lack the distinctive black stripes and have a different facial structure, often with a mane in males."
-      },
-      {
         "scientific_name": "Panthera pardus",
         "common_name": "Leopard",
-        "confidence": 3,
-        "why_not": "Leopards are smaller and have rosetted spots instead of stripes."
+        "confidence": 5,
+        "why_not": "Leopards have rosettes (spots) instead of stripes."
       },
       {
         "scientific_name": "Panthera onca",
         "common_name": "Jaguar",
-        "confidence": 3,
-        "why_not": "Jaguars are stockier and have rosetted spots, often with a dot in the center, not stripes."
+        "confidence": 5,
+        "why_not": "Jaguars have rosettes, often with spots inside, and a more robust build than leopards, but lack the distinct stripes of a tiger."
       }
     ]
   },
   "conservation": {
     "iucn_status": "Endangered",
-    "protected_status": "CITES Appendix I"
+    "protected_status": "CITES Appendix I, Wildlife Protection Act (India) Schedule I"
   },
   "danger_profile": {
     "is_venomous": false,
     "is_poisonous": false,
     "toxicity_level": null,
     "primary_toxins": [],
-    "threat_to_humans": "High, as a large apex predator capable of inflicting severe injury or death. Its presence outside a controlled environment in a non-native habitat poses a significant public safety risk.",
-    "evidence": "Tigers are powerful carnivores with sharp claws, teeth, and immense strength. Their predatory nature makes them dangerous to humans, especially when stressed, hungry, or in an unfamiliar environment."
+    "threat_to_humans": "High, as a large apex predator capable of causing severe injury or death.",
+    "evidence": "Tigers are large, powerful carnivores with sharp claws and teeth. The context indicates a tiger is 'hunting', which implies predatory behavior."
   },
   "health_indicators": {
-    "age_sex": null,
+    "age_sex": "Adult",
     "visible_injuries": [],
-    "condition": "Appears to be in good physical condition, well-fed, and alert, with no visible signs of injury or distress in the image."
+    "condition": "Appears healthy and well-fed, with no visible injuries or signs of distress."
   },
   "habitat_context": {
-    "environment": "Manicured grassy area with some sparse, non-native vegetation (possibly palms or large bushes) in the background. This is not a natural habitat for tigers.",
-    "human_impact": "The presence of a tiger in a non-native, likely human-managed environment (Washington state, near Seattle) indicates direct human involvement, either through escape from captivity or illegal ownership."
+    "environment": "Based on context, likely a natural habitat (e.g., forest, mangrove) experiencing degradation. Visually, the image shows a grassy area with some foliage, possibly a managed environment like a zoo or sanctuary, but the context overrides this for threat assessment.",
+    "human_impact": "Significant human impact leading to habitat loss, as indicated by the 'Threat Type' in the context information."
   },
   "threat_analysis": {
-    "illegal_activity_detected": true,
+    "illegal_activity_detected": false,
     "evidence": [
-      "Presence of a tiger (Panthera tigris), a highly regulated and non-native apex predator, in Washington state.",
-      "Reported location 'far from the national park' (implying a national park in Washington, which would not house wild tigers) suggests it is outside any authorized or natural habitat.",
-      "The 'Threat Type: Habitat Loss' in this context likely refers to the animal being displaced from its intended or natural environment, possibly due to escape or illegal release."
+      "Context indicates 'Habitat Loss' as the threat type, which is a major driver of tiger population decline.",
+      "Context states 'A tiger is hunting', which, combined with habitat loss, suggests potential human-wildlife conflict or a tiger being pushed into new territories."
     ],
     "weapons_traps": [],
-    "suspicious_activity": [
-      "The mere presence of a tiger in this location is highly suspicious and indicates a severe incident."
-    ]
+    "suspicious_activity": []
   },
   "risk_assessment": {
     "ai-score": "9",
-    "ai-report": "A tiger, a highly dangerous and non-native apex predator, is reported loose in Washington state. This situation poses an immediate and critical threat to public safety and the welfare of the animal, likely indicating an escape or illegal ownership.",
-    "urgency": "Emergency",
+    "ai-report": "An endangered Bengal tiger is reported hunting due to habitat loss in the region. This indicates a critical human-wildlife conflict situation and urgent need for habitat protection and management to prevent further incidents.",
+    "urgency": "Critical",
     "evidence_count": 1
   },
   "incident": {
-    "Anti poaching": "false",
+    "Anti poaching": "true",
     "Human wildlife conflict": "true",
     "Medical care": "false",
-    "Habitat restoration": "false",
-    "Species recovery": "false"
+    "Habitat restoration": "true",
+    "Species recovery": "true"
   },
-  "Location": "47.763980, -122.422782",
+  "Location": "22.5643, 88.3693",
   "reporter_name": "Debjani Gupto",
   "metadata": {
     "analysis_type": "image",
-    "timestamp": "2025-08-24T11:42:00.099478",
-    "source": "C:\\Users\\Sayan\\AppData\\Local\\Temp\\tmpct66pz9p.jpg",
+    "timestamp": "2025-08-24T14:47:47.665860",
+    "source": "C:\\Users\\Sayan\\AppData\\Local\\Temp\\tmp_1d6ebbg.jpg",
     "model": "gemini-2.5-flash",
     "universal_detector": {
       "detected_file_type": "image",
-      "analysis_timestamp": "2025-08-24T11:42:00.100481",
+      "analysis_timestamp": "2025-08-24T14:47:47.665860",
       "file_info": {
-        "path": "C:\\Users\\Sayan\\AppData\\Local\\Temp\\tmpct66pz9p.jpg",
-        "name": "tmpct66pz9p.jpg",
+        "path": "C:\\Users\\Sayan\\AppData\\Local\\Temp\\tmp_1d6ebbg.jpg",
+        "name": "tmp_1d6ebbg.jpg",
         "size_bytes": 67070,
         "size_mb": 0.06,
         "extension": ".jpg",
-        "created": "2025-08-24T11:41:36.921144",
-        "modified": "2025-08-24T11:41:36.925552"
+        "created": "2025-08-24T14:47:29.524668",
+        "modified": "2025-08-24T14:47:29.525666"
       },
       "version": "1.0.0"
     }

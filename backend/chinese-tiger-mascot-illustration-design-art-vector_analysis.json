@@ -1,0 +1,24 @@
+{
+  "raw_response": "{\n  \"species\": {\n    \"scientific_name\": \"Panthera tigris\",\n    \"genus\": \"Panthera\",\n    \"species_epithet\": \"tigris\",\n    \"subspecies\": null,\n    \"common_name\": \"Tiger\",\n    \"other_common_names\": [],\n    \"confidence\": 95,\n    \"taxonomy\": {\n      \"class\": \"Mammalia\",\n      \"order\": \"Carnivora\",\n      \"family\": \"Felidae\"\n    },\n    \"distinguishing_features\": [\n      \"Distinctive orange and black striped fur pattern on the face and head\",\n      \"White fur on the muzzle, cheeks, and around the eyes\",\n      \"Prominent fangs and open mouth indicating a snarl or roar\",\n      \"Characteristic facial markings of a tiger\"\n    ],\n    \"similar_candidates\": [\n      {\n        \"scientific_name\": \"Panthera pardus\",\n        \"common_name\": \"Leopard\",\n        \"confidence\": 5,\n        \"why_not\": \"Leopards have rosettes, not stripes, as their primary coat pattern.\"\n      },\n      {\n        \"scientific_name\": \"Panthera onca\",\n        \"common_name\": \"Jaguar\",\n        \"confidence\": 5,\n        \"why_not\": \"Jaguars have rosettes, often with spots inside, not stripes.\"\n      },\n      {\n        \"scientific_name\": \"Panthera leo\",\n        \"common_name\": \"Lion\",\n        \"confidence\": 5,\n        \"why_not\": \"Lions have plain fur and males typically have a mane, lacking the distinct stripes of a tiger.\"\n      }\n    ]\n  },\n  \"conservation\": {\n    \"iucn_status\": \"Endangered\",\n    \"protected_status\": \"CITES Appendix I\"\n  },\n  \"danger_profile\": {\n    \"is_venomous\": false,\n    \"is_poisonous\": false,\n    \"toxicity_level\": null,\n    \"primary_toxins\": [],\n    \"threat_to_humans\": \"Apex predator, can be extremely dangerous if provoked, threatened, or in human-wildlife conflict situations.\",\n    \"evidence\": \"General knowledge of tiger behavior and the aggressive posture depicted in the stylized image.\"\n  },\n  \"health_indicators\": {\n    \"age_sex\": null,\n    \"visible_injuries\": [],\n    \"condition\": \"Cannot assess health or physical condition from a stylized drawing.\"\n  },\n  \"habitat_context\": {\n    \"environment\": \"Cannot determine specific habitat from a stylized drawing; typically found in forests, grasslands, and swamps.\",\n    \"human_impact\": null\n  },\n  \"threat_analysis\": {\n    \"illegal_activity_detected\": false,\n    \"evidence\": [],\n    \"weapons_traps\": [],\n    \"suspicious_activity\": []\n  },\n  \"risk_assessment\": {\n    \"ai-score\": \"1\",\n    \"ai-report\": \"The image is a stylized drawing of a tiger head and does not depict a real-world incident or immediate threat. No actionable intelligence for conservation intervention can be derived from the visual evidence alone.\",\n    \"urgency\": \"Low\",\n    \"evidence_count\": 0\n  },\n  \"incident\": {\n    \"Anti poaching\": false,\n    \"Human wildlife conflict\": false,\n    \"Medical care\": false,\n    \"Habitat restoration\": false,\n    ",
+  "error": "Failed to parse JSON",
+  "metadata": {
+    "analysis_type": "image",
+    "timestamp": "2025-08-24T13:58:49.158788",
+    "source": "C:\\Users\\Sayan\\AppData\\Local\\Temp\\tmp9uw3g7d_.webp",
+    "model": "gemini-2.5-flash",
+    "universal_detector": {
+      "detected_file_type": "image",
+      "analysis_timestamp": "2025-08-24T13:58:49.159788",
+      "file_info": {
+        "path": "C:\\Users\\Sayan\\AppData\\Local\\Temp\\tmp9uw3g7d_.webp",
+        "name": "tmp9uw3g7d_.webp",
+        "size_bytes": 11732,
+        "size_mb": 0.01,
+        "extension": ".webp",
+        "created": "2025-08-24T13:58:32.310780",
+        "modified": "2025-08-24T13:58:32.311788"
+      },
+      "version": "1.0.0"
+    }
+  }
+}
