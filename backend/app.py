@@ -1,5 +1,6 @@
 import os
 import sys
+sys.path.append('../agent')
 import json
 import tempfile
 from pathlib import Path

@@ -1,192 +1,24 @@
 {
   "session_info": {
-    "start_time": 1755999057.7519283,
-    "end_time": 1755999162.08092,
-    "total_events": 11
+    "start_time": 1756009859.8439157,
+    "end_time": 1756009902.8645568,
+    "total_events": 1
   },
   "events": [
     {
-      "event": "new_top_detection",
-      "timestamp": 1755999089.5619178,
-      "animal": "horse",
-      "detection_count": 1,
-      "confidence": 0.6175986528396606
-    },
-    {
-      "event": "periodic_status",
-      "timestamp": 1755999089.5631104,
-      "current_leader": {
-        "animal": "horse",
-        "count": 1,
-        "total_detections": 1,
-        "percentage": 100.0
-      },
-      "all_detections": {
-        "horse": 1
-      }
-    },
-    {
-      "event": "new_top_detection",
-      "timestamp": 1755999090.9229093,
-      "animal": "dog",
-      "detection_count": 10,
-      "confidence": 0.8172110915184021
-    },
-    {
-      "event": "periodic_status",
-      "timestamp": 1755999099.580301,
-      "current_leader": {
-        "animal": "dog",
-        "count": 49,
-        "total_detections": 69,
-        "percentage": 71.0
-      },
-      "all_detections": {
-        "horse": 20,
-        "dog": 49
-      }
-    },
-    {
-      "event": "periodic_status",
-      "timestamp": 1755999109.6556726,
-      "current_leader": {
-        "animal": "dog",
-        "count": 49,
-        "total_detections": 112,
-        "percentage": 43.8
-      },
-      "all_detections": {
-        "horse": 21,
-        "dog": 49,
-        "elephant": 42
-      }
-    },
-    {
-      "event": "periodic_status",
-      "timestamp": 1755999119.713339,
-      "current_leader": {
-        "animal": "dog",
-        "count": 61,
-        "total_detections": 125,
-        "percentage": 48.8
-      },
-      "all_detections": {
-        "horse": 21,
-        "dog": 61,
-        "elephant": 42,
-        "bear": 1
-      }
-    },
-    {
-      "event": "periodic_status",
-      "timestamp": 1755999129.720257,
-      "current_leader": {
-        "animal": "dog",
-        "count": 61,
-        "total_detections": 125,
-        "percentage": 48.8
-      },
-      "all_detections": {
-        "horse": 21,
-        "dog": 61,
-        "elephant": 42,
-        "bear": 1
-      }
-    },
-    {
-      "event": "periodic_status",
-      "timestamp": 1755999139.7846825,
-      "current_leader": {
-        "animal": "dog",
-        "count": 61,
-        "total_detections": 125,
-        "percentage": 48.8
-      },
-      "all_detections": {
-        "horse": 21,
-        "dog": 61,
-        "elephant": 42,
-        "bear": 1
-      }
-    },
-    {
-      "event": "periodic_status",
-      "timestamp": 1755999149.8471758,
-      "current_leader": {
-        "animal": "dog",
-        "count": 61,
-        "total_detections": 151,
-        "percentage": 40.4
-      },
-      "all_detections": {
-        "horse": 21,
-        "dog": 61,
-        "elephant": 42,
-        "bear": 1,
-        "cat": 26
-      }
-    },
-    {
-      "event": "periodic_status",
-      "timestamp": 1755999159.9169312,
-      "current_leader": {
-        "animal": "dog",
-        "count": 61,
-        "total_detections": 151,
-        "percentage": 40.4
-      },
-      "all_detections": {
-        "horse": 21,
-        "dog": 61,
-        "elephant": 42,
-        "bear": 1,
-        "cat": 26
-      }
-    },
-    {
       "event": "final_summary",
-      "timestamp": 1755999162.08092,
+      "timestamp": 1756009902.8635545,
       "session_stats": {
-        "total_time_seconds": 104.33,
-        "total_frames": 2981,
-        "processed_frames": 1490,
-        "average_fps": 14.3,
+        "total_time_seconds": 43.02,
+        "total_frames": 286,
+        "processed_frames": 142,
+        "average_fps": 3.3,
         "confidence_threshold": 0.5
       },
       "detection_results": {
-        "total_detections": 151,
-        "most_detected_animal": {
-          "animal": "dog",
-          "count": 61,
-          "percentage": 40.4
-        },
-        "all_animals": [
-          {
-            "animal": "dog",
-            "count": 61,
-            "percentage": 40.4
-          },
-          {
-            "animal": "elephant",
-            "count": 42,
-            "percentage": 27.8
-          },
-          {
-            "animal": "cat",
-            "count": 26,
-            "percentage": 17.2
-          },
-          {
-            "animal": "horse",
-            "count": 21,
-            "percentage": 13.9
-          },
-          {
-            "animal": "bear",
-            "count": 1,
-            "percentage": 0.7
-          }
-        ]
+        "total_detections": 0,
+        "most_detected_animal": null,
+        "all_animals": []
       }
     }
   ]

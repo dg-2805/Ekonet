@@ -101,8 +101,8 @@ export default function LiveDetectionPage() {
       if (videoRef.current) {
         videoRef.current.srcObject = null
       }
-      const backend = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5002'
-      fetch(`${backend}/webcam/stop_script`, { method: 'POST' }).catch(() => {})
+      // Call Next.js API to stop detection/webcam.py only
+      fetch('/api/stop-webcam', { method: 'POST' }).catch(() => {})
       setMjpegUrl(null)
     } finally {
       setMediaStream(null)
