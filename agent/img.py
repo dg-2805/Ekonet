@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional, Union
 
 # Load environment variables
-load_dotenv("C:/PROJECTS/StatusCode2/Ekonet/agent/.env")
+load_dotenv("C:/PROJECTS/StatusCode2/EkoNet/agent/.env")
 
 
 class ImageAnalyzer:

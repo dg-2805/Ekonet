@@ -12,9 +12,15 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const limit = Math.max(1, Math.min(100, parseInt(searchParams.get('limit') || '20')));
     const skip = Math.max(0, parseInt(searchParams.get('skip') || '0'));
+    const ngoId = searchParams.get('ngoId');
+
+    const query: any = {};
+    if (ngoId) {
+      query.assignedNgoId = ngoId;
+    }
 
     const docs = await collection
-      .find({})
+      .find(query)
       .sort({ 'metadata.timestamp': -1, timestamp: -1 })
       .skip(skip)
       .limit(limit)
@@ -31,12 +37,13 @@ export async function GET(request: NextRequest) {
       count: docs.length,
       skip,
       limit,
+      ngoId: ngoId || null,
     });
     if (serialized.length > 0) {
       // Log a readable preview to avoid flooding logs
       console.log(
         JSON.stringify(
-          serialized.map((d) => ({ _id: d._id, species: d.species?.common_name || d.species?.scientific_name, risk: d.risk_assessment })),
+          serialized.map((d) => ({ _id: d._id, assignedNgoId: d.assignedNgoId, species: d.species?.common_name || d.species?.scientific_name, risk: d.risk_assessment })),
           null,
           2,
         ),

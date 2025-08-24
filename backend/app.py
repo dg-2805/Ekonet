@@ -1,5 +1,6 @@
 import os
 import sys
+sys.path.append('../agent')
 import json
 import tempfile
 from pathlib import Path
@@ -8,11 +9,10 @@ from typing import List, Dict, Any, Optional
 from flask import Flask, request, jsonify, Response
 from typing import Optional
 import subprocess
-import sys
 from flask_cors import CORS
 
 # Add the specific path to your detect.py
-DETECT_PATH = "C:/PROJECTS/StatusCode2/Ekonet/agent"
+DETECT_PATH = "C:/PROJECTS/StatusCode2/ekonet/agent"
 sys.path.append(DETECT_PATH)
 
 try:
@@ -111,7 +111,7 @@ def analyze() -> Any:
             print(f"📄 Analyzing file: {f.filename}")
             
             original_name = Path(f.filename).stem
-            output_path = f"C:/PROJECTS/StatusCode2/Ekonet/backend/{original_name}_analysis.json"
+            output_path = f"C:/PROJECTS/StatusCode2/EkoNet/backend/{original_name}_analysis.json"
 
             is_video = (f.mimetype or '').startswith('video')
 
@@ -201,7 +201,7 @@ def analyze() -> Any:
             text_analysis = _analyze_text_with_context(description, analysis_context)
             
             # Generate output filename
-            output_path = f"C:/PROJECTS/StatusCode2/Ekonet/backend/text_report_{report_id}_analysis.json"
+            output_path = f"C:/PROJECTS/StatusCode2/EkoNet/backend/text_report_{report_id}_analysis.json"
             
             # Save results
             if UniversalDetector is not None:
@@ -284,6 +284,7 @@ except Exception:
 
 _webcam_cap = None  # lazy-initialized capture
 _webcam_proc: Optional[subprocess.Popen] = None  # external webcam.py process
+_ip_camera_url: Optional[str] = None  # IP camera URL for external streams
 
 # Optional YOLO detection for MJPEG stream
 try:
@@ -300,9 +301,14 @@ _det_counts: dict[str, int] = {}
 _session_start_ts: Optional[float] = None
 
 def _get_webcam_cap():
-    global _webcam_cap
+    global _webcam_cap, _ip_camera_url
     if _webcam_cap is None and _cv2_ok:
-        _webcam_cap = cv2.VideoCapture(0)
+        if _ip_camera_url:
+            # Use IP camera URL
+            _webcam_cap = cv2.VideoCapture(_ip_camera_url)
+        else:
+            # Use local webcam
+            _webcam_cap = cv2.VideoCapture(0)
         # Try setting a sane resolution
         try:
             _webcam_cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
@@ -310,6 +316,25 @@ def _get_webcam_cap():
         except Exception:
             pass
     return _webcam_cap
+
+def _reset_webcam_cap():
+    """Reset webcam capture to allow switching between local and IP camera"""
+    global _webcam_cap
+    if _webcam_cap is not None:
+        _webcam_cap.release()
+        _webcam_cap = None
+
+def _set_ip_camera_url(url: str):
+    """Set IP camera URL and reset capture"""
+    global _ip_camera_url
+    _ip_camera_url = url
+    _reset_webcam_cap()
+
+def _clear_ip_camera_url():
+    """Clear IP camera URL and reset to local webcam"""
+    global _ip_camera_url
+    _ip_camera_url = None
+    _reset_webcam_cap()
 
 def _generate_mjpeg():
     import time
@@ -367,9 +392,17 @@ def _generate_mjpeg():
 
 @app.get('/webcam/start')
 def webcam_start() -> Any:
+    # Check for IP camera URL in query parameters
+    source = request.args.get('source')
+    if source:
+        _set_ip_camera_url(source)
+    else:
+        # No source provided, switch back to local webcam
+        _clear_ip_camera_url()
+    
     cap = _get_webcam_cap()
     ok = _cv2_ok and cap is not None and cap.isOpened()
-    return jsonify({"ok": ok})
+    return jsonify({"ok": ok, "source": "ip_camera" if _ip_camera_url else "local_webcam"})
 
 @app.get('/webcam/stream')
 def webcam_stream():
@@ -379,6 +412,12 @@ def webcam_stream():
 def webcam_start_script() -> Any:
     """Start external Python webcam script (agent/webcam.py) using a command string."""
     global _webcam_proc
+    
+    # Check for IP camera URL in query parameters
+    source = request.args.get('source')
+    if source:
+        _set_ip_camera_url(source)
+    
     try:
         if _webcam_proc and _webcam_proc.poll() is None:
             return jsonify({"ok": True, "message": "webcam.py already running"})

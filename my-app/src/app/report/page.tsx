@@ -40,6 +40,14 @@ interface ThreatFormData {
   isAnonymous: boolean
 }
 
+interface NearestNgo {
+  id: string
+  orgName?: string
+  email?: string
+  location?: string
+  distanceKm: number
+}
+
 const ThreatReporting = () => {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoadingLocation, setIsLoadingLocation] = useState(false)
@@ -48,6 +56,7 @@ const ThreatReporting = () => {
   const [isMapPickerOpen, setIsMapPickerOpen] = useState(false)
   const [pendingMapCoords, setPendingMapCoords] = useState<{ lat: number | null; lng: number | null }>({ lat: null, lng: null })
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const [nearestNgos, setNearestNgos] = useState<NearestNgo[]>([])
   const commitMapSelection = () => {
     if (pendingMapCoords.lat !== null && pendingMapCoords.lng !== null) {
       const lat = pendingMapCoords.lat
@@ -266,7 +275,7 @@ const ThreatReporting = () => {
       }
       
       const result = await response.json()
-      
+      setNearestNgos(Array.isArray(result?.nearestNgos) ? result.nearestNgos : [])
       setIsSubmitted(true)
     } catch (error) {
       alert("Failed to submit report. Please try again.")
@@ -292,11 +301,27 @@ const ThreatReporting = () => {
                 Your wildlife threat report has been successfully submitted. Our conservation team will review your
                 report and take appropriate action.
               </p>
+              {nearestNgos.length > 0 && (
+                <div className="text-left space-y-4 mb-8">
+                  <div className="text-white font-semibold text-lg">Top nearby NGOs informed</div>
+                  <div className="space-y-3">
+                    {nearestNgos.map((ngo, idx) => (
+                      <div key={ngo.id} className="flex items-center justify-between rounded-xl border border-white/15 bg-white/5 p-4">
+                        <div className="min-w-0">
+                          <div className="text-white font-medium truncate">{ngo.orgName || 'NGO'}</div>
+                          <div className="text-slate-400 text-sm truncate">{ngo.email || ngo.location || '—'}</div>
+                        </div>
+                        <div className="text-emerald-400 font-semibold ml-4 flex-shrink-0">{ngo.distanceKm.toFixed(1)} km</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div className="space-y-6">
                 <Alert className="enhanced-alert text-left">
                   <Shield className="h-5 w-5" />
                   <AlertDescription className="text-lg">
-                    Your report ID:{" "}
+                    Your report ID: {" "}
                     <strong className="text-emerald-400">
                       WW-{Math.random().toString(36).substr(2, 8).toUpperCase()}
                     </strong>
@@ -305,7 +330,7 @@ const ThreatReporting = () => {
                   </AlertDescription>
                 </Alert>
                 <Button
-                  onClick={() => setIsSubmitted(false)}
+                  onClick={() => { setIsSubmitted(false); setNearestNgos([]); }}
                   className="enhanced-button-primary px-10 py-6 h-auto text-lg"
                 >
                   Submit Another Report

@@ -77,17 +77,29 @@ export default function LiveDetectionPage() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null)
   const [mjpegUrl, setMjpegUrl] = useState<string | null>(null)
+  const [sourceType, setSourceType] = useState<'webcam' | 'ip'>('webcam')
+  const [ipBaseUrl, setIpBaseUrl] = useState<string>('http://10.50.51.10:8080')
+  const buildIpMjpegUrl = (base: string) => `${base.replace(/\/+$/,'')}/video`
 
   const startWebcam = async () => {
     try {
       const backend = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5002'
-      // Start external webcam.py in backend
-      await fetch(`${backend}/webcam/start_script`, { method: 'POST' }).catch(() => {})
-      // Also init camera for MJPEG fallback
-      await fetch(`${backend}/webcam/start`).catch(() => {})
-      setMjpegUrl(`${backend}/webcam/stream`)
-      setIsPlaying(true)
-      setSessionData((prev) => ({ ...prev, isActive: true, startTime: Date.now() }))
+      if (sourceType === 'ip') {
+        const url = buildIpMjpegUrl(ipBaseUrl)
+        // Use backend's processed stream with YOLO detection
+        await fetch(`${backend}/webcam/start_script?source=${encodeURIComponent(url)}`, { method: 'POST' }).catch(() => {})
+        await fetch(`${backend}/webcam/start?source=${encodeURIComponent(url)}`).catch(() => {})
+        setMjpegUrl(`${backend}/webcam/stream`)
+        setIsPlaying(true)
+        setSessionData((prev) => ({ ...prev, isActive: true, startTime: Date.now() }))
+      } else {
+        // Laptop webcam via backend
+        await fetch(`${backend}/webcam/start_script`, { method: 'POST' }).catch(() => {})
+        await fetch(`${backend}/webcam/start`).catch(() => {})
+        setMjpegUrl(`${backend}/webcam/stream`)
+        setIsPlaying(true)
+        setSessionData((prev) => ({ ...prev, isActive: true, startTime: Date.now() }))
+      }
     } catch (err) {
       console.error("Failed to start webcam:", err)
     }
@@ -145,7 +157,7 @@ export default function LiveDetectionPage() {
                  {/* Header */}
          <div className="mb-2">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-1">Live Wildlife Detection</h1>
-          <p className="text-slate-300">Open your webcam to preview a live feed</p>
+          <p className="text-slate-300">Open your webcam or IP camera to preview a live feed</p>
         </div>
 
                  {/* Main Layout */}
@@ -168,6 +180,28 @@ export default function LiveDetectionPage() {
                     </span>
                   </div>
                 </div>
+                <div className="mt-3 flex items-center gap-3 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-slate-300">Source</span>
+                    <select
+                      value={sourceType}
+                      onChange={(e) => setSourceType(e.target.value as 'webcam' | 'ip')}
+                      className="bg-white/10 border border-white/20 text-white text-sm rounded-md px-2 py-1 focus:outline-none focus:ring-0"
+                    >
+                      <option value="webcam">Webcam</option>
+                      <option value="ip">IP Camera</option>
+                    </select>
+                  </div>
+                  {sourceType === 'ip' && (
+                    <input
+                      type="text"
+                      value={ipBaseUrl}
+                      onChange={(e) => setIpBaseUrl(e.target.value)}
+                      placeholder="http://phone-ip:8080"
+                      className="bg-white/10 border border-white/20 text-white text-sm rounded-md px-3 py-1.5 w-72 placeholder:text-slate-400"
+                    />
+                  )}
+                </div>
               </CardHeader>
               <CardContent className="flex-1 flex flex-col min-h-0">
                 <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-white/10 to-white/5 border border-white/10 flex-1 min-h-0">
@@ -180,8 +214,8 @@ export default function LiveDetectionPage() {
                     <div className="w-full h-full flex items-center justify-center">
                       <div className="text-center text-slate-200">
                         <Camera className="w-16 h-16 mx-auto mb-4 text-emerald-400" />
-                        <p className="text-white/90">Webcam is currently off</p>
-                        <p className="text-sm text-slate-300">Click Start Webcam to begin</p>
+                        <p className="text-white/90">Stream is currently off</p>
+                        <p className="text-sm text-slate-300">Click Start {sourceType === 'ip' ? 'IP Camera' : 'Webcam'} to begin</p>
                       </div>
                     </div>
                   )}
@@ -217,7 +251,7 @@ export default function LiveDetectionPage() {
                      className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 text-base font-medium"
                    >
                      {isPlaying ? <Square className="w-5 h-5 mr-3" /> : <Play className="w-5 h-5 mr-3" />}
-                     {isPlaying ? "Stop Webcam" : "Start Webcam"}
+                     {isPlaying ? (sourceType === 'ip' ? 'Stop IP Camera' : 'Stop Webcam') : (sourceType === 'ip' ? 'Start IP Camera' : 'Start Webcam')}
                    </Button>
                  </div>
               </CardContent>

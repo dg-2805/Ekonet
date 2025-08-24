@@ -2,6 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 export const runtime = 'nodejs';
 
+function haversineDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const toRad = (v: number) => (v * Math.PI) / 180;
+  const R = 6371; // km
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
 interface ThreatFormData {
   threatType: string;
   location: string;
@@ -303,25 +316,67 @@ export async function POST(request: NextRequest) {
 
     // Save AI analysis JSON(s) to MongoDB (collection: report-analysis)
     let mongoSaveSummary: { savedCount: number; ids: string[] } = { savedCount: 0, ids: [] };
+    let nearestNgos: Array<{ id: string; orgName?: string; email?: string; location?: string; distanceKm: number }> = [];
     try {
       const client = await connectToDatabase();
       const db = client.db();
+
+      // Compute nearest NGOs if coordinates provided
+      const lat = Number(coordinates?.latitude);
+      const lon = Number(coordinates?.longitude);
+      const hasCoords = Number.isFinite(lat) && Number.isFinite(lon);
+      let assignedNgoId: string | null = null;
+      let assignedNgoDistanceKm: number | null = null;
+      if (hasCoords) {
+        const ngoDocs = await db.collection('users')
+          .find({ role: 'ngo', 'locationCoords.lat': { $ne: null }, 'locationCoords.lng': { $ne: null } }, { projection: { orgName: 1, email: 1, location: 1, locationCoords: 1 } })
+          .toArray();
+        const withDistance = ngoDocs
+          .map((ngo: any) => {
+            const nlat = Number(ngo?.locationCoords?.lat);
+            const nlon = Number(ngo?.locationCoords?.lng);
+            if (!Number.isFinite(nlat) || !Number.isFinite(nlon)) return null;
+            const distanceKm = haversineDistanceKm(lat, lon, nlat, nlon);
+            return { id: String(ngo._id), orgName: ngo.orgName, email: ngo.email, location: ngo.location, distanceKm };
+          })
+          .filter(Boolean) as Array<{ id: string; orgName?: string; email?: string; location?: string; distanceKm: number }>;
+        withDistance.sort((a, b) => a.distanceKm - b.distanceKm);
+        nearestNgos = withDistance.slice(0, 2);
+        if (withDistance.length > 0) {
+          assignedNgoId = withDistance[0].id;
+          assignedNgoDistanceKm = withDistance[0].distanceKm;
+        }
+      }
+
+      // Save analysis results, tagging assignment to the single nearest NGO
       const collection = db.collection('report-analysis');
       const ids: string[] = [];
       if (analysisResults.results && analysisResults.results.length > 0) {
         for (const r of analysisResults.results) {
           if (r.analysis_result) {
-            const saved = await collection.insertOne(r.analysis_result);
+            const toSave = {
+              ...r.analysis_result,
+              assignedNgoId: assignedNgoId || null,
+              assignedNgoDistanceKm: assignedNgoDistanceKm ?? null,
+              reporter_name: reporterName || undefined,
+            };
+            const saved = await collection.insertOne(toSave);
             ids.push(String(saved.insertedId));
           }
         }
       } else if (reportData) {
-        const saved = await collection.insertOne(reportData as any);
+        const toSave = {
+          ...reportData as any,
+          assignedNgoId: assignedNgoId || null,
+          assignedNgoDistanceKm: assignedNgoDistanceKm ?? null,
+          reporter_name: reporterName || undefined,
+        };
+        const saved = await collection.insertOne(toSave);
         ids.push(String(saved.insertedId));
       }
       mongoSaveSummary = { savedCount: ids.length, ids };
     } catch (mongoErr) {
-      console.error('❌ Failed to save AI analysis to report-analysis:', mongoErr);
+      console.error('❌ Failed to save AI analysis or find NGOs:', mongoErr);
     }
 
     return NextResponse.json({
@@ -331,6 +386,7 @@ export async function POST(request: NextRequest) {
       analysisResults,
       reportData,
       mongoSaveSummary,
+      nearestNgos,
       fullPayload, // Include the full payload in response for debugging
     });
 

@@ -7,8 +7,8 @@ export default function Footer() {
           {/* Logo and Description */}
           <div className="flex flex-col space-y-4">
             <div className="flex items-center gap-3">
-              <img src="/paw-icon.png" alt="eकोnet" className="w-10 h-10 rounded-lg" />
-              <span className="text-2xl font-serif font-bold text-gradient-nature tracking-wide">eकोnet</span>
+              <img src="/paw-icon.png" alt="EkoNet" className="w-10 h-10 rounded-lg" />
+              <span className="text-2xl font-serif font-bold text-gradient-nature tracking-wide">EkoNet</span>
             </div>
             <p className="text-gray-400 text-sm font-light">
               Connecting citizens with NGOs for wildlife conservation and emergency response.
@@ -58,7 +58,7 @@ export default function Footer() {
         
         {/* Copyright Section */}
         <div className="border-t border-white/20 pt-8 text-center text-sm text-gray-400">
-          <p className="font-light tracking-wide">© {new Date().getFullYear()} eकोnet. Made with love for wildlife conservation.</p>
+          <p className="font-light tracking-wide">© {new Date().getFullYear()} EkoNet. Made with love for wildlife conservation.</p>
         </div>
       </div>
     </footer>

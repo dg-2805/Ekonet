@@ -88,8 +88,8 @@ const Navbar = () => {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <img src="/paw-icon.png" alt="eकोnet" className="w-10 h-10 rounded-xl" />
-            <span className="text-2xl font-serif font-bold text-gradient-nature">eकोnet</span>
+            <img src="/paw-icon.png" alt="EkoNet" className="w-10 h-10 rounded-xl" />
+            <span className="text-2xl font-serif font-bold text-gradient-nature">EkoNet</span>
           </Link>
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-muted-foreground hover:text-primary transition-colors text-base">How it Works</a>

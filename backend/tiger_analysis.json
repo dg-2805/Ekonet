@@ -1,0 +1,111 @@
+{
+  "species": {
+    "scientific_name": "Panthera tigris",
+    "genus": "Panthera",
+    "species_epithet": "tigris",
+    "subspecies": null,
+    "common_name": "Tiger",
+    "other_common_names": [],
+    "confidence": 98,
+    "taxonomy": {
+      "class": "Mammalia",
+      "order": "Carnivora",
+      "family": "Felidae"
+    },
+    "distinguishing_features": [
+      "Distinctive orange fur with black vertical stripes",
+      "White fur on the belly, chest, and inner limbs",
+      "Large, muscular build typical of a big cat",
+      "Characteristic facial markings with white around the muzzle and eyes",
+      "Rounded ears with white spots on the back (ocelli)"
+    ],
+    "similar_candidates": [
+      {
+        "scientific_name": "Panthera leo",
+        "common_name": "Lion",
+        "confidence": 5,
+        "why_not": "Lions lack the distinctive black stripes and have a different facial structure, often with a mane in males."
+      },
+      {
+        "scientific_name": "Panthera pardus",
+        "common_name": "Leopard",
+        "confidence": 3,
+        "why_not": "Leopards are smaller and have rosetted spots instead of stripes."
+      },
+      {
+        "scientific_name": "Panthera onca",
+        "common_name": "Jaguar",
+        "confidence": 3,
+        "why_not": "Jaguars are stockier and have rosetted spots, often with a dot in the center, not stripes."
+      }
+    ]
+  },
+  "conservation": {
+    "iucn_status": "Endangered",
+    "protected_status": "CITES Appendix I"
+  },
+  "danger_profile": {
+    "is_venomous": false,
+    "is_poisonous": false,
+    "toxicity_level": null,
+    "primary_toxins": [],
+    "threat_to_humans": "High, as a large apex predator capable of inflicting severe injury or death. Its presence outside a controlled environment in a non-native habitat poses a significant public safety risk.",
+    "evidence": "Tigers are powerful carnivores with sharp claws, teeth, and immense strength. Their predatory nature makes them dangerous to humans, especially when stressed, hungry, or in an unfamiliar environment."
+  },
+  "health_indicators": {
+    "age_sex": null,
+    "visible_injuries": [],
+    "condition": "Appears to be in good physical condition, well-fed, and alert, with no visible signs of injury or distress in the image."
+  },
+  "habitat_context": {
+    "environment": "Manicured grassy area with some sparse, non-native vegetation (possibly palms or large bushes) in the background. This is not a natural habitat for tigers.",
+    "human_impact": "The presence of a tiger in a non-native, likely human-managed environment (Washington state, near Seattle) indicates direct human involvement, either through escape from captivity or illegal ownership."
+  },
+  "threat_analysis": {
+    "illegal_activity_detected": true,
+    "evidence": [
+      "Presence of a tiger (Panthera tigris), a highly regulated and non-native apex predator, in Washington state.",
+      "Reported location 'far from the national park' (implying a national park in Washington, which would not house wild tigers) suggests it is outside any authorized or natural habitat.",
+      "The 'Threat Type: Habitat Loss' in this context likely refers to the animal being displaced from its intended or natural environment, possibly due to escape or illegal release."
+    ],
+    "weapons_traps": [],
+    "suspicious_activity": [
+      "The mere presence of a tiger in this location is highly suspicious and indicates a severe incident."
+    ]
+  },
+  "risk_assessment": {
+    "ai-score": "9",
+    "ai-report": "A tiger, a highly dangerous and non-native apex predator, is reported loose in Washington state. This situation poses an immediate and critical threat to public safety and the welfare of the animal, likely indicating an escape or illegal ownership.",
+    "urgency": "Emergency",
+    "evidence_count": 1
+  },
+  "incident": {
+    "Anti poaching": "false",
+    "Human wildlife conflict": "true",
+    "Medical care": "false",
+    "Habitat restoration": "false",
+    "Species recovery": "false"
+  },
+  "Location": "47.763980, -122.422782",
+  "reporter_name": "Debjani Gupto",
+  "metadata": {
+    "analysis_type": "image",
+    "timestamp": "2025-08-24T11:42:00.099478",
+    "source": "C:\\Users\\Sayan\\AppData\\Local\\Temp\\tmpct66pz9p.jpg",
+    "model": "gemini-2.5-flash",
+    "universal_detector": {
+      "detected_file_type": "image",
+      "analysis_timestamp": "2025-08-24T11:42:00.100481",
+      "file_info": {
+        "path": "C:\\Users\\Sayan\\AppData\\Local\\Temp\\tmpct66pz9p.jpg",
+        "name": "tmpct66pz9p.jpg",
+        "size_bytes": 67070,
+        "size_mb": 0.06,
+        "extension": ".jpg",
+        "created": "2025-08-24T11:41:36.921144",
+        "modified": "2025-08-24T11:41:36.925552"
+      },
+      "version": "1.0.0"
+    }
+  }
+}

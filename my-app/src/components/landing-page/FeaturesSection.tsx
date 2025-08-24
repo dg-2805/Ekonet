@@ -40,7 +40,7 @@ export default function FeaturesSection() {
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-serif font-bold mb-6 text-foreground">
-            How <span className="text-gradient-nature">eकोnet</span> Works
+            How <span className="text-gradient-nature">EkoNet</span> Works
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Cutting-edge technology meets compassionate conservation

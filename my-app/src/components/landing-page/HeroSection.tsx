@@ -25,7 +25,7 @@ export default function HeroSection() {
             <span className="text-gradient-nature">Seconds</span>
           </h1>
           <div className="text-3xl md:text-4xl mx-auto text-white mb-12">
-            eकोnet empowers citizens to{" "}
+            EkoNet empowers citizens to{" "}
             <FlipWords
               words={words}
               className="font-semibold text-emerald-400/70"

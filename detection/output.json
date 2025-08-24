@@ -1,190 +1,372 @@
 {
   "session_info": {
-    "start_time": 1755999057.7519283,
-    "end_time": 1755999162.08092,
-    "total_events": 11
+    "start_time": 1756016479.0356169,
+    "end_time": 1756016717.3621721,
+    "total_events": 26
   },
   "events": [
     {
       "event": "new_top_detection",
-      "timestamp": 1755999089.5619178,
-      "animal": "horse",
+      "timestamp": 1756016479.7283223,
+      "animal": "elephant",
       "detection_count": 1,
-      "confidence": 0.6175986528396606
+      "confidence": 0.5549420118331909
     },
     {
       "event": "periodic_status",
-      "timestamp": 1755999089.5631104,
+      "timestamp": 1756016489.112785,
       "current_leader": {
-        "animal": "horse",
+        "animal": "elephant",
         "count": 1,
         "total_detections": 1,
         "percentage": 100.0
       },
       "all_detections": {
-        "horse": 1
+        "elephant": 1
       }
     },
     {
       "event": "new_top_detection",
-      "timestamp": 1755999090.9229093,
-      "animal": "dog",
-      "detection_count": 10,
-      "confidence": 0.8172110915184021
+      "timestamp": 1756016490.837958,
+      "animal": "cat",
+      "detection_count": 2,
+      "confidence": 0.7064707279205322
     },
     {
       "event": "periodic_status",
-      "timestamp": 1755999099.580301,
+      "timestamp": 1756016499.1464942,
       "current_leader": {
-        "animal": "dog",
-        "count": 49,
-        "total_detections": 69,
-        "percentage": 71.0
+        "animal": "cat",
+        "count": 6,
+        "total_detections": 7,
+        "percentage": 85.7
       },
       "all_detections": {
-        "horse": 20,
-        "dog": 49
+        "elephant": 1,
+        "cat": 6
       }
     },
     {
       "event": "periodic_status",
-      "timestamp": 1755999109.6556726,
+      "timestamp": 1756016509.1835222,
       "current_leader": {
-        "animal": "dog",
-        "count": 49,
-        "total_detections": 112,
-        "percentage": 43.8
+        "animal": "cat",
+        "count": 7,
+        "total_detections": 8,
+        "percentage": 87.5
       },
       "all_detections": {
-        "horse": 21,
-        "dog": 49,
-        "elephant": 42
+        "elephant": 1,
+        "cat": 7
       }
     },
     {
       "event": "periodic_status",
-      "timestamp": 1755999119.713339,
+      "timestamp": 1756016519.2768064,
       "current_leader": {
-        "animal": "dog",
-        "count": 61,
-        "total_detections": 125,
-        "percentage": 48.8
+        "animal": "cat",
+        "count": 7,
+        "total_detections": 8,
+        "percentage": 87.5
       },
       "all_detections": {
-        "horse": 21,
-        "dog": 61,
-        "elephant": 42,
-        "bear": 1
+        "elephant": 1,
+        "cat": 7
       }
     },
     {
       "event": "periodic_status",
-      "timestamp": 1755999129.720257,
+      "timestamp": 1756016529.294705,
       "current_leader": {
-        "animal": "dog",
-        "count": 61,
-        "total_detections": 125,
-        "percentage": 48.8
+        "animal": "cat",
+        "count": 7,
+        "total_detections": 8,
+        "percentage": 87.5
       },
       "all_detections": {
-        "horse": 21,
-        "dog": 61,
-        "elephant": 42,
-        "bear": 1
+        "elephant": 1,
+        "cat": 7
       }
     },
     {
       "event": "periodic_status",
-      "timestamp": 1755999139.7846825,
+      "timestamp": 1756016539.3899307,
       "current_leader": {
-        "animal": "dog",
-        "count": 61,
-        "total_detections": 125,
-        "percentage": 48.8
+        "animal": "cat",
+        "count": 7,
+        "total_detections": 8,
+        "percentage": 87.5
       },
       "all_detections": {
-        "horse": 21,
-        "dog": 61,
-        "elephant": 42,
-        "bear": 1
+        "elephant": 1,
+        "cat": 7
       }
     },
     {
       "event": "periodic_status",
-      "timestamp": 1755999149.8471758,
+      "timestamp": 1756016549.4269197,
       "current_leader": {
-        "animal": "dog",
-        "count": 61,
-        "total_detections": 151,
-        "percentage": 40.4
+        "animal": "cat",
+        "count": 7,
+        "total_detections": 8,
+        "percentage": 87.5
       },
       "all_detections": {
-        "horse": 21,
-        "dog": 61,
-        "elephant": 42,
-        "bear": 1,
-        "cat": 26
+        "elephant": 1,
+        "cat": 7
       }
     },
     {
       "event": "periodic_status",
-      "timestamp": 1755999159.9169312,
+      "timestamp": 1756016559.5535464,
       "current_leader": {
-        "animal": "dog",
-        "count": 61,
-        "total_detections": 151,
-        "percentage": 40.4
+        "animal": "cat",
+        "count": 8,
+        "total_detections": 9,
+        "percentage": 88.9
       },
       "all_detections": {
-        "horse": 21,
-        "dog": 61,
-        "elephant": 42,
-        "bear": 1,
-        "cat": 26
+        "elephant": 1,
+        "cat": 8
+      }
+    },
+    {
+      "event": "periodic_status",
+      "timestamp": 1756016569.7154078,
+      "current_leader": {
+        "animal": "cat",
+        "count": 9,
+        "total_detections": 11,
+        "percentage": 81.8
+      },
+      "all_detections": {
+        "elephant": 2,
+        "cat": 9
+      }
+    },
+    {
+      "event": "periodic_status",
+      "timestamp": 1756016579.786529,
+      "current_leader": {
+        "animal": "cat",
+        "count": 9,
+        "total_detections": 11,
+        "percentage": 81.8
+      },
+      "all_detections": {
+        "elephant": 2,
+        "cat": 9
+      }
+    },
+    {
+      "event": "periodic_status",
+      "timestamp": 1756016589.8350306,
+      "current_leader": {
+        "animal": "cat",
+        "count": 9,
+        "total_detections": 11,
+        "percentage": 81.8
+      },
+      "all_detections": {
+        "elephant": 2,
+        "cat": 9
+      }
+    },
+    {
+      "event": "periodic_status",
+      "timestamp": 1756016599.8866625,
+      "current_leader": {
+        "animal": "cat",
+        "count": 9,
+        "total_detections": 11,
+        "percentage": 81.8
+      },
+      "all_detections": {
+        "elephant": 2,
+        "cat": 9
+      }
+    },
+    {
+      "event": "periodic_status",
+      "timestamp": 1756016609.9417875,
+      "current_leader": {
+        "animal": "cat",
+        "count": 9,
+        "total_detections": 11,
+        "percentage": 81.8
+      },
+      "all_detections": {
+        "elephant": 2,
+        "cat": 9
+      }
+    },
+    {
+      "event": "periodic_status",
+      "timestamp": 1756016620.015388,
+      "current_leader": {
+        "animal": "cat",
+        "count": 9,
+        "total_detections": 11,
+        "percentage": 81.8
+      },
+      "all_detections": {
+        "elephant": 2,
+        "cat": 9
+      }
+    },
+    {
+      "event": "periodic_status",
+      "timestamp": 1756016630.055846,
+      "current_leader": {
+        "animal": "cat",
+        "count": 12,
+        "total_detections": 20,
+        "percentage": 60.0
+      },
+      "all_detections": {
+        "elephant": 8,
+        "cat": 12
+      }
+    },
+    {
+      "event": "periodic_status",
+      "timestamp": 1756016640.190082,
+      "current_leader": {
+        "animal": "cat",
+        "count": 13,
+        "total_detections": 21,
+        "percentage": 61.9
+      },
+      "all_detections": {
+        "elephant": 8,
+        "cat": 13
+      }
+    },
+    {
+      "event": "periodic_status",
+      "timestamp": 1756016650.2502537,
+      "current_leader": {
+        "animal": "cat",
+        "count": 17,
+        "total_detections": 25,
+        "percentage": 68.0
+      },
+      "all_detections": {
+        "elephant": 8,
+        "cat": 17
+      }
+    },
+    {
+      "event": "periodic_status",
+      "timestamp": 1756016660.257525,
+      "current_leader": {
+        "animal": "cat",
+        "count": 17,
+        "total_detections": 27,
+        "percentage": 63.0
+      },
+      "all_detections": {
+        "elephant": 10,
+        "cat": 17
+      }
+    },
+    {
+      "event": "periodic_status",
+      "timestamp": 1756016670.3547413,
+      "current_leader": {
+        "animal": "cat",
+        "count": 17,
+        "total_detections": 27,
+        "percentage": 63.0
+      },
+      "all_detections": {
+        "elephant": 10,
+        "cat": 17
+      }
+    },
+    {
+      "event": "periodic_status",
+      "timestamp": 1756016680.3976693,
+      "current_leader": {
+        "animal": "cat",
+        "count": 18,
+        "total_detections": 28,
+        "percentage": 64.3
+      },
+      "all_detections": {
+        "elephant": 10,
+        "cat": 18
+      }
+    },
+    {
+      "event": "periodic_status",
+      "timestamp": 1756016690.499442,
+      "current_leader": {
+        "animal": "cat",
+        "count": 27,
+        "total_detections": 37,
+        "percentage": 73.0
+      },
+      "all_detections": {
+        "elephant": 10,
+        "cat": 27
+      }
+    },
+    {
+      "event": "periodic_status",
+      "timestamp": 1756016700.5505843,
+      "current_leader": {
+        "animal": "cat",
+        "count": 27,
+        "total_detections": 37,
+        "percentage": 73.0
+      },
+      "all_detections": {
+        "elephant": 10,
+        "cat": 27
+      }
+    },
+    {
+      "event": "periodic_status",
+      "timestamp": 1756016710.5646243,
+      "current_leader": {
+        "animal": "cat",
+        "count": 27,
+        "total_detections": 37,
+        "percentage": 73.0
+      },
+      "all_detections": {
+        "elephant": 10,
+        "cat": 27
       }
     },
     {
       "event": "final_summary",
-      "timestamp": 1755999162.08092,
+      "timestamp": 1756016717.3621721,
       "session_stats": {
-        "total_time_seconds": 104.33,
-        "total_frames": 2981,
-        "processed_frames": 1490,
-        "average_fps": 14.3,
+        "total_time_seconds": 238.33,
+        "total_frames": 3497,
+        "processed_frames": 1748,
+        "average_fps": 7.3,
         "confidence_threshold": 0.5
       },
       "detection_results": {
-        "total_detections": 151,
+        "total_detections": 37,
         "most_detected_animal": {
-          "animal": "dog",
-          "count": 61,
-          "percentage": 40.4
+          "animal": "cat",
+          "count": 27,
+          "percentage": 73.0
         },
         "all_animals": [
           {
-            "animal": "dog",
-            "count": 61,
-            "percentage": 40.4
+            "animal": "cat",
+            "count": 27,
+            "percentage": 73.0
           },
           {
             "animal": "elephant",
-            "count": 42,
-            "percentage": 27.8
-          },
-          {
-            "animal": "cat",
-            "count": 26,
-            "percentage": 17.2
-          },
-          {
-            "animal": "horse",
-            "count": 21,
-            "percentage": 13.9
-          },
-          {
-            "animal": "bear",
-            "count": 1,
-            "percentage": 0.7
+            "count": 10,
+            "percentage": 27.0
           }
         ]
       }

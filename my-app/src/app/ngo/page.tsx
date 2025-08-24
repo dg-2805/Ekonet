@@ -157,15 +157,19 @@ export default function NGODashboard() {
     }
   }
 
-  const loadReportAnalysis = async (): Promise<Incident[]> => {
-    const res = await fetch('/api/report-analysis?limit=200')
+  const loadReportAnalysis = async (ngoId?: string): Promise<Incident[]> => {
+    const query = ngoId ? `?limit=200&ngoId=${encodeURIComponent(ngoId)}` : `?limit=200`
+    const res = await fetch(`/api/report-analysis${query}`, { cache: 'no-store' })
     if (!res.ok) {
       console.error('Failed to fetch report-analysis:', res.status, res.statusText)
       setIncidents([])
       return []
     }
     const data = await res.json()
-    const items = Array.isArray(data?.items) ? data.items : []
+    let items = Array.isArray(data?.items) ? data.items : []
+    if (ngoId) {
+      items = items.filter((d: any) => d?.assignedNgoId === ngoId)
+    }
     const mapped = items.map(mapDocToIncident)
     setIncidents(mapped)
     console.log('📋 NGO triage incidents (from report-analysis):', mapped)
@@ -257,16 +261,25 @@ export default function NGODashboard() {
         setSummary(summaryData)
       }
 
-      // Load triage incidents from report-analysis (remove hardcoded)
-      await loadReportAnalysis()
+      // Load triage incidents for this NGO only
+      await loadReportAnalysis(currentUser?.id)
     } catch (error) {
       console.error("Failed to fetch data:", error)
-      // On failure, still attempt loading from report-analysis (no hardcoded data)
-      await loadReportAnalysis()
+      // On failure, still attempt loading from report-analysis (filtered if possible)
+      await loadReportAnalysis(user?.id)
     } finally {
       setLoading(false)
     }
   }
+
+  // Refresh incidents when user becomes available (ensures filtered fetch once user is set)
+  useEffect(() => {
+    (async () => {
+      if (user?.id) {
+        await loadReportAnalysis(user.id)
+      }
+    })()
+  }, [user?.id])
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString)
