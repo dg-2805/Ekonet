@@ -1,79 +1,24 @@
 {
   "session_info": {
-    "start_time": 1756027637.058281,
-    "end_time": 1756027650.4194803,
-    "total_events": 767
+    "start_time": 1756009859.8439157,
+    "end_time": 1756009902.8645568,
+    "total_events": 1
   },
   "events": [
     {
       "event": "final_summary",
-      "timestamp": 1756027650.4194803,
+      "timestamp": 1756009902.8635545,
       "session_stats": {
-        "total_time_seconds": 13.36,
-        "total_frames": 156,
-        "processed_frames": 156,
-        "average_fps": 0,
-        "confidence_threshold": null
+        "total_time_seconds": 43.02,
+        "total_frames": 286,
+        "processed_frames": 142,
+        "average_fps": 3.3,
+        "confidence_threshold": 0.5
       },
       "detection_results": {
-        "total_detections": 767,
-        "most_detected_animal": {
-          "animal": "person",
-          "count": 635,
-          "percentage": 82.8
-        },
-        "all_animals": [
-          {
-            "animal": "person",
-            "count": 635,
-            "percentage": 82.8
-          },
-          {
-            "animal": "chair",
-            "count": 53,
-            "percentage": 6.9
-          },
-          {
-            "animal": "tv",
-            "count": 23,
-            "percentage": 3.0
-          },
-          {
-            "animal": "elephant",
-            "count": 20,
-            "percentage": 2.6
-          },
-          {
-            "animal": "laptop",
-            "count": 16,
-            "percentage": 2.1
-          },
-          {
-            "animal": "cell phone",
-            "count": 8,
-            "percentage": 1.0
-          },
-          {
-            "animal": "dog",
-            "count": 5,
-            "percentage": 0.7
-          },
-          {
-            "animal": "teddy bear",
-            "count": 4,
-            "percentage": 0.5
-          },
-          {
-            "animal": "cup",
-            "count": 2,
-            "percentage": 0.3
-          },
-          {
-            "animal": "wine glass",
-            "count": 1,
-            "percentage": 0.1
-          }
-        ]
+        "total_detections": 0,
+        "most_detected_animal": null,
+        "all_animals": []
       }
     }
   ]
