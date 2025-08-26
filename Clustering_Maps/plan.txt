@@ -1,0 +1,27 @@
+wildlife_crimes_project/
+│
+├── data/
+│   ├── wildlife_crimes_mock.csv        # Your dataset (mock or real)
+│   ├── raw/                            # Raw data (if you get multiple sources)
+│   └── processed/wildlife_processed.csv                      # Cleaned / feature-engineered data
+│
+├── notebooks/
+│   ├── 01_data_exploration.ipynb       # EDA (exploratory data analysis)
+│   ├── 02_feature_engineering.ipynb    # Creating/transforming features
+│   └── 03_model_training.ipynb         # Training ML models
+│   └── model training trail.ipynb
+│
+├── src/                                # Source code
+│   ├── data_preprocessing.py           # Scripts for cleaning & transforming data
+│   ├── feature_engineering.py          # Functions for feature creation
+│   ├── train_model.py                  # Training ML models
+│   ├── evaluate_model.py               # Model evaluation
+│   └── utils.py                        # Helper functions
+│
+├── reports/
+│   ├── figures/                        # Plots, charts, maps
+│   └── model_performance.md            # Model results and observations
+│
+├── requirements.txt                     # Python dependencies
+├── README.md                            # Project description & instructions
+└── setup.py                             # Optional, if packaging the project

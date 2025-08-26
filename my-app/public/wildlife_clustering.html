@@ -200,11 +200,7 @@
                 <input type="checkbox" id="clusters-toggle" checked> Clusters
             </label>
         </div>
-        <div class="control-item">
-            <label>
-                <input type="checkbox" id="heatmap-toggle"> Heatmap
-            </label>
-        </div>
+        
     </div>
 
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
@@ -35556,7 +35552,7 @@
         
         // Layer groups
         let markersGroup = L.markerClusterGroup();
-        let heatmapLayer = null;
+        
         
         function createMarkers(data) {
             markersGroup.clearLayers();
@@ -35625,18 +35621,6 @@
             }
         }
         
-        function createHeatmap(data) {
-            if (heatmapLayer) {
-                map.removeLayer(heatmapLayer);
-            }
-            
-            const heatData = data.map(point => [point.lat, point.lng, 1]);
-            heatmapLayer = L.heatLayer(heatData, {radius: 25});
-            
-            if (document.getElementById('heatmap-toggle').checked) {
-                map.addLayer(heatmapLayer);
-            }
-        }
         
         function applyFilters() {
             const animalFilter = document.getElementById('animal-filter').value;
@@ -35659,7 +35643,7 @@
         
         function updateMap() {
       createMarkers(filteredData);
-      createHeatmap(filteredData);
+      
       updateClusterLegend(filteredData);
     }
         
@@ -35672,13 +35656,7 @@
             }
         });
         
-        document.getElementById('heatmap-toggle').addEventListener('change', function() {
-            if (this.checked && heatmapLayer) {
-                map.addLayer(heatmapLayer);
-            } else if (heatmapLayer) {
-                map.removeLayer(heatmapLayer);
-            }
-        });
+        
         
         // Initialize
     updateMap();
